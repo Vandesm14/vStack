@@ -1,0 +1,14 @@
+push 2
+push 2
+add    ; 4
+push 8
+add    ; 4 + 8 = 12
+push 6 ; 12 , 6
+debug
+swp
+debug
+swp
+debug
+sub    ; 12 - 6 = 6
+debug
+halt
