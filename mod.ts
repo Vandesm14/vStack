@@ -50,74 +50,19 @@ const compile = (program: string): Op[] => {
 	const LINE_FEED = program.indexOf('\r') ? '\r\n' : '\n'
 
 	for (let line of program.split(LINE_FEED)) {
-		if (line.trim().startsWith(';')) continue
+		if (line.trim().startsWith(';') || line.trim() === '') continue
 		line = line.trim().split(';')[0]
 		const [op, ...args] = line.split(' ').filter(el => el !== '\n')
-		switch (op) {
-			case 'push':
-				ops.push(Op.Push, ...args.map(Number))
-				break
-			case 'pop':
-				ops.push(Op.Pop)
-				break
-			case 'add':
-				ops.push(Op.Add)
-				break
-			case 'sub':
-				ops.push(Op.Sub)
-				break
-			case 'mul':
-				ops.push(Op.Mul)
-				break
-			case 'div':
-				ops.push(Op.Div)
-				break
-			case 'swp':
-				ops.push(Op.Swp)
-				break
-			case 'jmp':
-				ops.push(Op.Jmp, ...args.map(Number))
-				break
-			case 'jmpz':
-				ops.push(Op.Jmpz, ...args.map(Number))
-				break
-			case 'jmpnz':
-				ops.push(Op.Jmpnz, ...args.map(Number))
-				break
-			case 'jmpe':
-				ops.push(Op.Jmpe, ...args.map(Number))
-				break
-			case 'jmpne':
-				ops.push(Op.Jmpne, ...args.map(Number))
-				break
-			case 'jmpg':
-				ops.push(Op.Jmpg, ...args.map(Number))
-				break
-			case 'jmpge':
-				ops.push(Op.Jmpge, ...args.map(Number))
-				break
-			case 'jmpl':
-				ops.push(Op.Jmpl, ...args.map(Number))
-				break
-			case 'jmple':
-				ops.push(Op.Jmple, ...args.map(Number))
-				break
-			case 'read':
-				ops.push(Op.Read, ...args.map(Number))
-				break
-			case 'write':
-				ops.push(Op.Write, ...args.map(Number))
-				break
-			case 'halt':
-				ops.push(Op.Halt)
-				break
-			case 'debug':
-				ops.push(Op.DEBUG)
-				break
-			default:
-				throw new Error(`Unknown op: "${op}"`)
+		const match = Ops.find(el => el.toLowerCase() === op.toLowerCase())
+
+		if (op && match) {
+			ops.push(Op[match], ...args.map(Number))
+		} else {
+			throw new Error(`Unknown op: "${op}"`)
 		}
 	}
+
+	console.log(ops)
 
 	return ops
 }
@@ -130,6 +75,11 @@ const BUS_SIZE = 2*5 // 32 bytes
 const run = (program: Op[]) => {
 	const stack = new Uint8Array(STACK_SIZE)
 	const bus = new Uint8Array(BUS_SIZE)
+
+	const checkLength = (size: number) => {
+		if (stackPtr - size >= 0) true
+		else throw new Error('Stack underflow')
+	}
 
 	let stackPtr = 0
 	let programPtr = 0
@@ -147,25 +97,31 @@ const run = (program: Op[]) => {
 				stackPtr++
 				break
 			case Op.Pop:
+				checkLength(1)
 				stackPtr--
 				break
 			case Op.Add:
+				checkLength(2)
 				stack[stackPtr - 2] += stack[stackPtr - 1]
 				stackPtr--
 				break
 			case Op.Sub:
-				stack[stackPtr - 1] -= stack[stackPtr]
+				checkLength(2)
+				stack[stackPtr - 2] -= stack[stackPtr - 1]
 				stackPtr--
 				break
 			case Op.Mul:
-				stack[stackPtr - 1] *= stack[stackPtr]
+				checkLength(2)
+				stack[stackPtr - 2] *= stack[stackPtr - 1]
 				stackPtr--
 				break
 			case Op.Div:
-				stack[stackPtr - 1] /= stack[stackPtr]
+				checkLength(2)
+				stack[stackPtr - 2] /= stack[stackPtr - 1]
 				stackPtr--
 				break
 			case Op.Swp:
+				checkLength(2)
 				{
 					const tmp = stack[stackPtr - 2]
 					stack[stackPtr - 2] = stack[stackPtr - 1]
@@ -176,6 +132,7 @@ const run = (program: Op[]) => {
 				programPtr = program[programPtr]
 				break
 			case Op.Jmpz:
+				checkLength(1)
 				if (stack[stackPtr - 1] === 0) {
 					programPtr = program[programPtr]
 				} else {
@@ -183,6 +140,7 @@ const run = (program: Op[]) => {
 				}
 				break
 			case Op.Jmpnz:
+				checkLength(1)
 				if (stack[stackPtr - 1] !== 0) {
 					programPtr = program[programPtr]
 				} else {
@@ -190,6 +148,7 @@ const run = (program: Op[]) => {
 				}
 				break
 			case Op.Jmpe:
+				checkLength(1)
 				if (stack[stackPtr - 1] === program[programPtr]) {
 					programPtr = program[programPtr + 1]
 				} else {
@@ -197,6 +156,7 @@ const run = (program: Op[]) => {
 				}
 				break
 			case Op.Jmpne:
+				checkLength(1)
 				if (stack[stackPtr - 1] !== program[programPtr]) {
 					programPtr = program[programPtr + 1]
 				} else {
@@ -204,6 +164,7 @@ const run = (program: Op[]) => {
 				}
 				break
 			case Op.Jmpg:
+				checkLength(1)
 				if (stack[stackPtr - 1] > program[programPtr]) {
 					programPtr = program[programPtr + 1]
 				} else {
@@ -211,6 +172,7 @@ const run = (program: Op[]) => {
 				}
 				break
 			case Op.Jmpge:
+				checkLength(1)
 				if (stack[stackPtr - 1] >= program[programPtr]) {
 					programPtr = program[programPtr + 1]
 				} else {
@@ -218,6 +180,7 @@ const run = (program: Op[]) => {
 				}
 				break
 			case Op.Jmpl:
+				checkLength(1)
 				if (stack[stackPtr - 1] < program[programPtr]) {
 					programPtr = program[programPtr + 1]
 				} else {
@@ -225,6 +188,7 @@ const run = (program: Op[]) => {
 				}
 				break
 			case Op.Jmple:
+				checkLength(1)
 				if (stack[stackPtr - 1] <= program[programPtr]) {
 					programPtr = program[programPtr + 1]
 				} else {
@@ -232,6 +196,7 @@ const run = (program: Op[]) => {
 				}
 				break
 			case Op.Read:
+				checkLength(1)
 				stack[stackPtr] = program[programPtr]
 				programPtr++
 				stackPtr++
