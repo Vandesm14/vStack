@@ -75,6 +75,7 @@ enum Op {
 const Ops = Object.keys(Op).filter(key => Number.isNaN(Number(key))) as (keyof typeof Op)[]
 
 const compile = (program: string): Op[] => {
+	console.log('--------- compiling ---------')
 	const ops: Op[] = []
 	const LINE_FEED = program.indexOf('\r') ? '\r\n' : '\n'
 
@@ -94,12 +95,14 @@ const compile = (program: string): Op[] => {
 	return ops
 }
 
+console.clear()
 const PROGRAM: Op[] = compile(Deno.readTextFileSync('./program.txt'))
 
 const STACK_SIZE = 256
 const BUS_SIZE = 32
 
 const run = (program: Op[]) => {
+	console.log('---------- running ----------')
 	const stack = new Uint8Array(STACK_SIZE)
 	const bus = new Uint8Array(BUS_SIZE)
 
@@ -287,7 +290,7 @@ const run = (program: Op[]) => {
 			case Op.Halt:
 				return stack
 			case Op.DEBUG:
-				console.log({programPtr, data: program[programPtr], stackPtr, stack})
+				console.log('DEBUG:', {programPtr, stackPtr, stack})
 				break
 			default:
 				throw new Error(`Unknown op: "${op}"`)
@@ -302,5 +305,4 @@ const run = (program: Op[]) => {
 	throw new Error('Program ended without halt')
 }
 
-console.clear()
-run(PROGRAM)
+console.log('result:', run(PROGRAM))
