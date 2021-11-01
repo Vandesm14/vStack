@@ -204,7 +204,7 @@ const run = (program: Op[]) => {
 				stackPtr--
 				break
 			case Op.Halt:
-				return
+				return stack
 			case Op.DEBUG:
 				console.log({programPtr, data: program[programPtr], stackPtr, stack})
 				break
@@ -212,9 +212,10 @@ const run = (program: Op[]) => {
 				throw new Error(`Unknown op: "${op}"`)
 		}
 
-		for (let i = stackPtr; i < stack.length; i++) {
-			stack[i] = 0
-		}
+		// Commenting this out for now, since it's not really needed
+		// for (let i = stackPtr; i < stack.length; i++) {
+		// 	stack[i] = 0
+		// }
 	}
 
 	throw new Error('Program ended without halt')
