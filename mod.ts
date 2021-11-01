@@ -1,6 +1,7 @@
 enum Op {
 	/** no operation */
 	Nop,
+
 	/** push value to stack */
 	Push,
 	/** pop value from stack */
@@ -15,6 +16,33 @@ enum Op {
 	Div,
 	/** swaps the top two values on the stack: [a, b] => [b, a] */
 	Swp,
+	/** increment the value at the top of the stack by 1 */
+	Inc,
+	/** decrement the value at the top of the stack by 1 */
+	Dec,
+	/** duplicate the value at the top of the stack */
+	Dup,
+	/** biitwise shoft left the value at the top of the stack */
+	Shl,
+	/** biitwise shoft right the value at the top of the stack */
+	Shr,
+
+	/** not yet */
+	And,
+	/** not yet */
+	Or,
+	/** not yet */
+	Xor,
+	/** not yet */
+	Not,
+
+	/** set the stack pointer the value of the top of the stack */
+	Stkp,
+	/** increnemt the stack pointer by 1 */
+	Stki,
+	/** deccrenemt the stack pointer by 1 */
+	Stkd,
+
 	/** jump to address */
 	Jmp,
 	/** jump to address if top of stack is zero */
@@ -33,6 +61,7 @@ enum Op {
 	Jmpl,
 	/** jump to address if top of stack is less than or equal to value */
 	Jmple,
+
 	/** read value from the buss at address and push it to the stack */
 	Read,
 	/** write value from the stack to the bus at address */
@@ -76,7 +105,7 @@ const run = (program: Op[]) => {
 
 	const checkLength = (size: number, p: number) => {
 		if (stackPtr - size >= 0) true
-		else throw new Error(`Stack underflow on "${Op[program[p]]}" at index ${p}`)
+		else throw new Error(`Stack underflow on "${Op[program[p - 1]]}" at index ${p}`)
 	}
 
 	let stackPtr = 0
@@ -125,6 +154,58 @@ const run = (program: Op[]) => {
 					stack[stackPtr - 2] = stack[stackPtr - 1]
 					stack[stackPtr - 1] = tmp
 				}
+				break
+			case Op.Inc:
+				checkLength(1, programPtr)
+				stack[stackPtr - 1]++
+				break
+			case Op.Dec:
+				checkLength(1, programPtr)
+				stack[stackPtr - 1]--
+				break
+			case Op.Dup:
+				checkLength(1, programPtr)
+				stack[stackPtr] = stack[stackPtr - 1]
+				stackPtr++
+				break
+			case Op.Shl:
+				checkLength(1, programPtr)
+				stack[stackPtr - 1] <<= 1
+				break
+			case Op.Shr:
+				checkLength(1, programPtr)
+				stack[stackPtr - 1] >>= 1
+				break
+			case Op.And:
+				checkLength(2, programPtr)
+				stack[stackPtr - 2] &= stack[stackPtr - 1]
+				stackPtr--
+				break
+			case Op.Or:
+				checkLength(2, programPtr)
+				stack[stackPtr - 2] |= stack[stackPtr - 1]
+				stackPtr--
+				break
+			case Op.Xor:
+				checkLength(2, programPtr)
+				stack[stackPtr - 2] ^= stack[stackPtr - 1]
+				stackPtr--
+				break
+			case Op.Not:
+				checkLength(1, programPtr)
+				stack[stackPtr - 1] = ~stack[stackPtr - 1]
+				break
+			case Op.Stkp:
+				checkLength(1, programPtr)
+				stackPtr = stack[stackPtr - 1]
+				break
+			case Op.Stki:
+				checkLength(1, programPtr)
+				stackPtr++
+				break
+			case Op.Stkd:
+				checkLength(1, programPtr)
+				stackPtr--
 				break
 			case Op.Jmp:
 				programPtr = program[programPtr]
