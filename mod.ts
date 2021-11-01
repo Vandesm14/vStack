@@ -62,15 +62,13 @@ const compile = (program: string): Op[] => {
 		}
 	}
 
-	console.log(ops)
-
 	return ops
 }
 
 const PROGRAM: Op[] = compile(Deno.readTextFileSync('./program.txt'))
 
-const STACK_SIZE = 2^8 // 256 bytes
-const BUS_SIZE = 2*5 // 32 bytes
+const STACK_SIZE = 256
+const BUS_SIZE = 32
 
 const run = (program: Op[]) => {
 	const stack = new Uint8Array(STACK_SIZE)
