@@ -74,7 +74,7 @@ enum Op {
 
 const Ops = Object.keys(Op).filter(key => Number.isNaN(Number(key))) as (keyof typeof Op)[]
 
-const compile = (program: string): Op[] => {
+export const compile = (program: string): Op[] => {
 	console.log('--------- compiling ---------')
 	const ops: Op[] = []
 	const LINE_FEED = program.indexOf('\r') ? '\r\n' : '\n'
@@ -101,205 +101,133 @@ const PROGRAM: Op[] = compile(Deno.readTextFileSync('./program.txt'))
 const STACK_SIZE = 256
 const BUS_SIZE = 32
 
-const run = (program: Op[]) => {
+export const run = (program: Op[]) => {
 	console.log('---------- running ----------')
 	const stack = new Uint8Array(STACK_SIZE)
 	const bus = new Uint8Array(BUS_SIZE)
+
+	let stackPtr = 0
+	let programPtr = 0
 
 	const checkLength = (size: number, p: number) => {
 		if (stackPtr - size >= 0) true
 		else throw new Error(`Stack underflow on "${Op[program[p - 1]]}" at index ${p}`)
 	}
 
-	let stackPtr = 0
-	let programPtr = 0
+	const pop = () => {
+		checkLength(1, programPtr)
+		return stack[--stackPtr]
+	}
+
+	const push = (value: number) => {
+		stack[stackPtr] = value
+		stackPtr++
+	}
 
 	while (programPtr < program.length) {
 		const op = program[programPtr]
 		programPtr++
 
-		switch (op) {
-			case Op.Nop:
-				break
-			case Op.Push:
-				stack[stackPtr] = program[programPtr]
-				programPtr++
-				stackPtr++
-				break
-			case Op.Pop:
-				checkLength(1, programPtr)
-				stackPtr--
-				break
-			case Op.Add:
-				checkLength(2, programPtr)
-				stack[stackPtr - 2] += stack[stackPtr - 1]
-				stackPtr--
-				break
-			case Op.Sub:
-				checkLength(2, programPtr)
-				stack[stackPtr - 2] -= stack[stackPtr - 1]
-				stackPtr--
-				break
-			case Op.Mul:
-				checkLength(2, programPtr)
-				stack[stackPtr - 2] *= stack[stackPtr - 1]
-				stackPtr--
-				break
-			case Op.Div:
-				checkLength(2, programPtr)
-				stack[stackPtr - 2] /= stack[stackPtr - 1]
-				stackPtr--
-				break
-			case Op.Swp:
-				checkLength(2, programPtr)
-				{
-					const tmp = stack[stackPtr - 2]
-					stack[stackPtr - 2] = stack[stackPtr - 1]
-					stack[stackPtr - 1] = tmp
-				}
-				break
-			case Op.Inc:
-				checkLength(1, programPtr)
-				stack[stackPtr - 1]++
-				break
-			case Op.Dec:
-				checkLength(1, programPtr)
-				stack[stackPtr - 1]--
-				break
-			case Op.Dup:
-				checkLength(1, programPtr)
-				stack[stackPtr] = stack[stackPtr - 1]
-				stackPtr++
-				break
-			case Op.Shl:
-				checkLength(1, programPtr)
-				stack[stackPtr - 1] <<= 1
-				break
-			case Op.Shr:
-				checkLength(1, programPtr)
-				stack[stackPtr - 1] >>= 1
-				break
-			case Op.And:
-				checkLength(2, programPtr)
-				stack[stackPtr - 2] &= stack[stackPtr - 1]
-				stackPtr--
-				break
-			case Op.Or:
-				checkLength(2, programPtr)
-				stack[stackPtr - 2] |= stack[stackPtr - 1]
-				stackPtr--
-				break
-			case Op.Xor:
-				checkLength(2, programPtr)
-				stack[stackPtr - 2] ^= stack[stackPtr - 1]
-				stackPtr--
-				break
-			case Op.Not:
-				checkLength(1, programPtr)
-				stack[stackPtr - 1] = ~stack[stackPtr - 1]
-				break
-			case Op.Stkp:
-				checkLength(1, programPtr)
-				stackPtr = stack[stackPtr - 1]
-				break
-			case Op.Stki:
-				checkLength(1, programPtr)
-				stackPtr++
-				break
-			case Op.Stkd:
-				checkLength(1, programPtr)
-				stackPtr--
-				break
-			case Op.Jmp:
-				programPtr = program[programPtr]
-				break
-			case Op.Jmpz:
-				checkLength(1, programPtr)
-				if (stack[stackPtr - 1] === 0) {
-					programPtr = program[programPtr]
-				} else {
-					programPtr++
-				}
-				break
-			case Op.Jmpnz:
-				checkLength(1, programPtr)
-				if (stack[stackPtr - 1] !== 0) {
-					programPtr = program[programPtr]
-				} else {
-					programPtr++
-				}
-				break
-			case Op.Jmpe:
-				checkLength(1, programPtr)
-				if (stack[stackPtr - 1] === program[programPtr]) {
-					programPtr = program[programPtr + 1]
-				} else {
-					programPtr += 2
-				}
-				break
-			case Op.Jmpne:
-				checkLength(1, programPtr)
-				if (stack[stackPtr - 1] !== program[programPtr]) {
-					programPtr = program[programPtr + 1]
-				} else {
-					programPtr += 2
-				}
-				break
-			case Op.Jmpg:
-				checkLength(1, programPtr)
-				if (stack[stackPtr - 1] > program[programPtr]) {
-					programPtr = program[programPtr + 1]
-				} else {
-					programPtr += 2
-				}
-				break
-			case Op.Jmpge:
-				checkLength(1, programPtr)
-				if (stack[stackPtr - 1] >= program[programPtr]) {
-					programPtr = program[programPtr + 1]
-				} else {
-					programPtr += 2
-				}
-				break
-			case Op.Jmpl:
-				checkLength(1, programPtr)
-				if (stack[stackPtr - 1] < program[programPtr]) {
-					programPtr = program[programPtr + 1]
-				} else {
-					programPtr += 2
-				}
-				break
-			case Op.Jmple:
-				checkLength(1, programPtr)
-				if (stack[stackPtr - 1] <= program[programPtr]) {
-					programPtr = program[programPtr + 1]
-				} else {
-					programPtr += 2
-				}
-				break
-			case Op.Read:
-				checkLength(1, programPtr)
-				stack[stackPtr] = program[programPtr]
-				programPtr++
-				stackPtr++
-				break
-			case Op.Write:
-				console.log(stack[stackPtr - 1])
-				stackPtr--
-				break
-			case Op.Halt:
-				return stack
-			case Op.DEBUG:
-				console.log('DEBUG:', {programPtr, stackPtr, stack})
-				break
-			default:
-				throw new Error(`Unknown op: "${op}"`)
+		if (Op.Push) {
+			push(program[programPtr])
+		} else if (Op.Pop) {
+			pop()
+		} else if (Op.Add) {
+			const a = pop()
+			const b = pop()
+			push(a + b)
+		} else if (Op.Sub) {
+			const a = pop()
+			const b = pop()
+			push(b - a)
+		} else if (Op.Mul) {
+			const a = pop()
+			const b = pop()
+			push(a * b)
+		} else if (Op.Div) {
+			const a = pop()
+			const b = pop()
+			push(b / a)
+		} else if (Op.Swp) {
+			const a = pop()
+			const b = pop()
+			push(a)
+			push(b)
+		} else if (Op.Inc) {
+			const a = pop()
+			push(a + 1)
+		} else if (Op.Dec) {
+			const a = pop()
+			push(a - 1)
+		} else if (Op.Dup) {
+			const a = pop()
+			push(a)
+			push(a)
+		} else if (Op.Shl) {
+			const a = pop()
+			push(a << 1)
+		} else if (Op.Shr) {
+			const a = pop()
+			push(a >> 1)
+		} else if (Op.And) {
+			const a = pop()
+			push(a & 1)
+		} else if (Op.Or) {
+			const a = pop()
+			push(a | 1)
+		} else if (Op.Xor) {
+			const a = pop()
+			push(a ^ 1)
+		} else if (Op.Not) {
+			const a = pop()
+			push(~a)
+		} else if (Op.Stkp) {
+			const a = pop()
+			stackPtr = a
+		} else if (Op.Stki) {
+			stackPtr++
+		} else if (Op.Stkd) {
+			stackPtr--
+		} else if (Op.Jmp) {
+			programPtr = program[programPtr]
+		} else if (Op.Jmpz) {
+			const a = pop()
+			if (a === 0) programPtr = program[programPtr]
+		} else if (Op.Jmpnz) {
+			const a = pop()
+			if (a !== 0) programPtr = program[programPtr]
+		} else if (Op.Jmpe) {
+			const a = pop()
+			if (a === program[programPtr]) programPtr = program[programPtr]
+		} else if (Op.Jmpne) {
+			const a = pop()
+			if (a !== program[programPtr]) programPtr = program[programPtr]
+		} else if (Op.Jmpg) {
+			const a = pop()
+			if (a > program[programPtr]) programPtr = program[programPtr]
+		} else if (Op.Jmpge) {
+			const a = pop()
+			if (a >= program[programPtr]) programPtr = program[programPtr]
+		} else if (Op.Jmpl) {
+			const a = pop()
+			if (a < program[programPtr]) programPtr = program[programPtr]
+		} else if (Op.Jmple) {
+			const a = pop()
+			if (a <= program[programPtr]) programPtr = program[programPtr]
+		} else if (Op.Read) {
+			stack[stackPtr] = program[programPtr]
+			programPtr++
+			stackPtr++
+		} else if (Op.Write) {
+			const a = pop()
+			console.log(a)
+		} else if (Op.Halt) {
+			return stack
+		} else if (Op.DEBUG) {
+			console.log('DEBUG:', {programPtr, stackPtr, stack})
+		} else {
+			throw new Error(`Unknown op: "${op}"`)
 		}
-
-		// Commenting this out for now, since it's not really needed
-		// for (let i = stackPtr; i < stack.length; i++) {
-		// 	stack[i] = 0
-		// }
 	}
 
 	throw new Error('Program ended without halt')
