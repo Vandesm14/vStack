@@ -22,6 +22,8 @@ export enum Op {
 	Dec,
 	/** duplicate the value at the top of the stack */
 	Dup,
+	/** duplicate the top two values from the stack */
+	Dup2,
 	/** biitwise shoft left the value at the top of the stack */
 	Shl,
 	/** biitwise shoft right the value at the top of the stack */
@@ -97,7 +99,7 @@ export const compile = (program: string): Op[] => {
 const STACK_SIZE = 256
 const BUS_SIZE = 32
 
-interface runOptions {
+export interface runOptions {
 	/** returns the stack from the bottom to the stack pointer (instead of the entire allocated stack) */
 	shorten?: boolean
 	/** sends the state to the console each step (before running an op) */
@@ -165,6 +167,13 @@ export const run = (program: Op[], opt?: runOptions) => {
 		} else if (op === Op.Dup) {
 			const a = pop()
 			push(a)
+			push(a)
+		} else if (op === Op.Dup2) {
+			const a = pop()
+			const b = pop()
+			push(b)
+			push(a)
+			push(b)
 			push(a)
 		} else if (op === Op.Shl) {
 			const a = pop()

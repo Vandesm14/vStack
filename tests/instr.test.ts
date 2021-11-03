@@ -1,10 +1,8 @@
-import { run, compile } from '../lib.ts'
-// import { assertObjectMatch } from 'https://deno.land/std@0.113.0/testing/asserts.ts'
+import { run, runOptions, compile } from '../lib.ts'
 import { it, assertObjectMatch } from '../testlib.ts'
-// import * as _ from 'https://deno.land/x/lodash@4.17.15-es/lodash.js'
 
-const compileAndRun = (code: string) => {
-	return run(compile(code), { shorten: true })
+const compileAndRun = (code: string, opt?: runOptions) => {
+	return run(compile(code), { shorten: true, ...opt })
 }
 
 const assertArrayMatch = (a: number[], b: number[]) => {
@@ -109,6 +107,16 @@ it('dup', () => {
 		halt
 	`)
 	assertArrayMatch([...result], [10,10])
+})
+
+it('dup2', () => {
+	const result = compileAndRun(`
+		push 10
+		push 20
+		dup2
+		halt
+	`)
+	assertArrayMatch([...result], [10,20,10,20])
 })
 
 it('shl', () => {
