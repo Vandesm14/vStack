@@ -1,5 +1,8 @@
 import { run, compile } from '../lib.ts'
-import { assertObjectMatch } from 'https://deno.land/std@0.113.0/testing/asserts.ts'
+import { assert } from 'https://deno.land/std@0.113.0/testing/asserts.ts'
+import * as _ from 'https://deno.land/x/lodash@4.17.15-es/lodash.js'
+
+const isEqual = _.isEqual
 
 const compileAndRun = (code: string) => {
 	return run(compile(code), { shorten: true })
@@ -13,7 +16,7 @@ it('push', () => {
 		'halt'
 	)
 
-	assertObjectMatch(result, {
-		stack: [10]
-	})
+	console.log('result', result)
+
+	assert(isEqual([...result], [10]))
 })

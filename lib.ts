@@ -75,9 +75,8 @@ export enum Op {
 const Ops = Object.keys(Op).filter(key => Number.isNaN(Number(key))) as (keyof typeof Op)[]
 
 export const compile = (program: string): Op[] => {
-	console.log('--------- compiling ---------')
 	const ops: Op[] = []
-	const LINE_FEED = program.indexOf('\r') ? '\r\n' : '\n'
+	const LINE_FEED = program.indexOf('\r') > 1 ? '\r\n' : '\n'
 
 	for (let line of program.split(LINE_FEED)) {
 		if (line.trim().startsWith(';') || line.trim() === '') continue
@@ -95,9 +94,6 @@ export const compile = (program: string): Op[] => {
 	return ops
 }
 
-console.clear()
-const PROGRAM: Op[] = compile(Deno.readTextFileSync('./program.txt'))
-
 const STACK_SIZE = 256
 const BUS_SIZE = 32
 
@@ -107,7 +103,6 @@ interface runOptions {
 }
 
 export const run = (program: Op[], opt?: runOptions) => {
-	console.log('---------- running ----------')
 	const stack = new Uint8Array(STACK_SIZE)
 	const bus = new Uint8Array(BUS_SIZE)
 
@@ -132,8 +127,6 @@ export const run = (program: Op[], opt?: runOptions) => {
 	while (programPtr < program.length) {
 		const op = program[programPtr]
 		programPtr++
-
-		console.log({ op: Op[op], opcode: op, program, programPtr, stack, stackPtr })
 
 		if (op === Op.Push) {
 			push(program[programPtr])
@@ -223,14 +216,16 @@ export const run = (program: Op[], opt?: runOptions) => {
 			const a = pop()
 			if (a <= program[programPtr]) programPtr = program[programPtr]
 		} else if (op === Op.Read) {
+			// TODO: implement, does nothing at the moment
 			stack[stackPtr] = program[programPtr]
 			programPtr++
 			stackPtr++
 		} else if (op === Op.Write) {
+			// TODO: implement, does nothing at the moment
 			const a = pop()
 			console.log(a)
 		} else if (op === Op.Halt) {
-			if (opt?.shorten) return stack.slice(0, stackPtr - 1)
+			if (opt?.shorten) return stack.slice(0, stackPtr)
 			else return stack
 		} else if (op === Op.DEBUG) {
 			console.log('DEBUG:', {programPtr, stackPtr, stack})
@@ -239,9 +234,5 @@ export const run = (program: Op[], opt?: runOptions) => {
 		}
 	}
 
-	console.log({stack, program, short: stack.slice(0, stackPtr - 1)})
-
 	throw new Error('Program ended without halt')
 }
-
-console.log('result:', run(PROGRAM))
