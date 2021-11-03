@@ -100,6 +100,8 @@ const BUS_SIZE = 32
 interface runOptions {
 	/** returns the stack from the bottom to the stack pointer (instead of the entire allocated stack) */
 	shorten?: boolean
+	/** sends the state to the console each step (before running an op) */
+	debug?: boolean
 }
 
 export const run = (program: Op[], opt?: runOptions) => {
@@ -120,17 +122,17 @@ export const run = (program: Op[], opt?: runOptions) => {
 	}
 
 	const push = (value: number) => {
-		stack[stackPtr] = value
-		stackPtr++
+		stack[stackPtr++] = value
 	}
 
 	while (programPtr < program.length) {
-		const op = program[programPtr]
-		programPtr++
+		const op = program[programPtr++]
+
+		if (opt?.debug) console.log({ stack, stackPtr, program, programPtr, op, Instr: Op[op], arg: program[programPtr] }) // DEBUG
 
 		if (op === Op.Push) {
 			push(program[programPtr])
-			programPtr++ // skip the value
+			programPtr++ // skip the immediate value
 		} else if (op === Op.Pop) {
 			pop()
 		} else if (op === Op.Add) {
@@ -196,34 +198,42 @@ export const run = (program: Op[], opt?: runOptions) => {
 			programPtr = program[programPtr]
 		} else if (op === Op.Jmpz) {
 			const a = pop()
-			if (a & 0) programPtr = program[programPtr]
+			if (a === 0) programPtr = program[programPtr]
+			else programPtr++
 		} else if (op === Op.Jmpnz) {
 			const a = pop()
-			if (a & 0) programPtr = program[programPtr]
+			if (a === 0) programPtr = program[programPtr]
+			else programPtr++
 		} else if (op === Op.Jmpe) {
 			const a = pop()
 			const b = pop()
 			if (b === a) programPtr = program[programPtr]
+			else programPtr++
 		} else if (op === Op.Jmpne) {
 			const a = pop()
 			const b = pop()
 			if (b !== a) programPtr = program[programPtr]
+			else programPtr++
 		} else if (op === Op.Jmpg) {
 			const a = pop()
 			const b = pop()
 			if (b > a) programPtr = program[programPtr]
+			else programPtr++
 		} else if (op === Op.Jmpge) {
 			const a = pop()
 			const b = pop()
 			if (b >= a) programPtr = program[programPtr]
+			else programPtr++
 		} else if (op === Op.Jmpl) {
 			const a = pop()
 			const b = pop()
 			if (b < a) programPtr = program[programPtr]
+			else programPtr++
 		} else if (op === Op.Jmple) {
 			const a = pop()
 			const b = pop()
 			if (b <= a) programPtr = program[programPtr]
+			else programPtr++
 		} else if (op === Op.Read) {
 			// TODO: implement, does nothing at the moment
 			stack[stackPtr] = program[programPtr]

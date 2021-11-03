@@ -181,7 +181,7 @@ it('jmp', () => {
 	assertArrayMatch([...result], [10,30])
 })
 
-it.only('jmpz', () => {
+it('jmpz', () => {
 	let result = compileAndRun(`
 		push 10
 		push 0
