@@ -1,0 +1,18 @@
+{
+  "name": "stork",
+  "version": "1.0.0",
+  "description": "A stack machine with support for virtual hardware",
+  "main": "mod.ts",
+  "scripts": {
+    "start": "deno run --allow-all script.ts",
+    "start:watch": "deno run --allow-all --watch script.ts",
+    "test": "deno test --allow-all",
+    "test:watch": "deno test --allow-all --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vandesm14/vStack.git"
+  },
+  "author": "vandesm14",
+  "homepage": "https://github.com/Vandesm14/vStack#readme"
+}
