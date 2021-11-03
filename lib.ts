@@ -172,13 +172,16 @@ export const run = (program: Op[], opt?: runOptions) => {
 			push(a >> 1)
 		} else if (op === Op.And) {
 			const a = pop()
-			push(a & 1)
+			const b = pop()
+			push(a & b)
 		} else if (op === Op.Or) {
 			const a = pop()
-			push(a | 1)
+			const b = pop()
+			push(a | b)
 		} else if (op === Op.Xor) {
 			const a = pop()
-			push(a ^ 1)
+			const b = pop()
+			push(a ^ b)
 		} else if (op === Op.Not) {
 			const a = pop()
 			push(~a)
@@ -193,28 +196,34 @@ export const run = (program: Op[], opt?: runOptions) => {
 			programPtr = program[programPtr]
 		} else if (op === Op.Jmpz) {
 			const a = pop()
-			if (a === 0) programPtr = program[programPtr]
+			if (a & 0) programPtr = program[programPtr]
 		} else if (op === Op.Jmpnz) {
 			const a = pop()
-			if (a !== 0) programPtr = program[programPtr]
+			if (a & 0) programPtr = program[programPtr]
 		} else if (op === Op.Jmpe) {
 			const a = pop()
-			if (a === program[programPtr]) programPtr = program[programPtr]
+			const b = pop()
+			if (b === a) programPtr = program[programPtr]
 		} else if (op === Op.Jmpne) {
 			const a = pop()
-			if (a !== program[programPtr]) programPtr = program[programPtr]
+			const b = pop()
+			if (b !== a) programPtr = program[programPtr]
 		} else if (op === Op.Jmpg) {
 			const a = pop()
-			if (a > program[programPtr]) programPtr = program[programPtr]
+			const b = pop()
+			if (b > a) programPtr = program[programPtr]
 		} else if (op === Op.Jmpge) {
 			const a = pop()
-			if (a >= program[programPtr]) programPtr = program[programPtr]
+			const b = pop()
+			if (b >= a) programPtr = program[programPtr]
 		} else if (op === Op.Jmpl) {
 			const a = pop()
-			if (a < program[programPtr]) programPtr = program[programPtr]
+			const b = pop()
+			if (b < a) programPtr = program[programPtr]
 		} else if (op === Op.Jmple) {
 			const a = pop()
-			if (a <= program[programPtr]) programPtr = program[programPtr]
+			const b = pop()
+			if (b <= a) programPtr = program[programPtr]
 		} else if (op === Op.Read) {
 			// TODO: implement, does nothing at the moment
 			stack[stackPtr] = program[programPtr]
