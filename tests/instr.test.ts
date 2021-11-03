@@ -14,6 +14,18 @@ const asUint = (n: number) => {
 	return n & 0xff
 }
 
+it('halt', () => {
+	let result = compileAndRun(`
+		halt
+	`)
+	assertArrayMatch([...result], [])
+
+	result = compileAndRun(`
+		halt
+	`, { shorten: false })
+	assertArrayMatch([...result], new Array(256).fill(0))
+})
+
 it('push', () => {
 	const result = compileAndRun(`
 		push 10
@@ -209,6 +221,180 @@ it('jmpz', () => {
 		halt
 	`)
 	assertArrayMatch([...result], [10,20,30])
+})
+
+it('jmpnz', () => {
+	let result = compileAndRun(`
+		push 10
+		push 0
+		jmpnz 8
+		push 20
+		push 30
+		halt
+	`)
+	assertArrayMatch([...result], [10,20,30])
+
+	result = compileAndRun(`
+		push 10
+		push 1
+		jmpnz 8
+		push 20
+		push 30
+		halt
+	`)
+	assertArrayMatch([...result], [10,30])
+})
+
+it('jmpe', () => {
+	let result = compileAndRun(`
+		push 10
+		push 10
+		jmpe 8
+		push 20
+		push 30
+		halt
+	`)
+	assertArrayMatch([...result], [30])
+
+	result = compileAndRun(`
+		push 10
+		push 1
+		jmpe 8
+		push 20
+		push 30
+		halt
+	`)
+	assertArrayMatch([...result], [20,30])
+})
+
+it('jmpne', () => {
+	let result = compileAndRun(`
+		push 10
+		push 10
+		jmpne 8
+		push 20
+		push 30
+		halt
+	`)
+	assertArrayMatch([...result], [20,30])
+
+	result = compileAndRun(`
+		push 10
+		push 1
+		jmpne 8
+		push 20
+		push 30
+		halt
+	`)
+	assertArrayMatch([...result], [30])
+})
+
+it('jmpg', () => {
+	let result = compileAndRun(`
+		push 10
+		push 10
+		jmpg 8
+		push 20
+		push 30
+		halt
+	`)
+	assertArrayMatch([...result], [20,30])
+
+	result = compileAndRun(`
+		push 10
+		push 1
+		jmpg 8
+		push 20
+		push 30
+		halt
+	`)
+	assertArrayMatch([...result], [30])
+})
+
+it('jmpge', () => {
+	let result = compileAndRun(`
+		push 10
+		push 11
+		jmpge 8
+		push 20
+		push 30
+		halt
+	`)
+	assertArrayMatch([...result], [20,30])
+
+	result = compileAndRun(`
+		push 10
+		push 10
+		jmpge 8
+		push 20
+		push 30
+		halt
+	`)
+	assertArrayMatch([...result], [30])
+
+	result = compileAndRun(`
+		push 10
+		push 1
+		jmpge 8
+		push 20
+		push 30
+		halt
+	`)
+	assertArrayMatch([...result], [30])
+})
+
+it('jmpl', () => {
+	let result = compileAndRun(`
+		push 10
+		push 10
+		jmpl 8
+		push 20
+		push 30
+		halt
+	`)
+	assertArrayMatch([...result], [20,30])
+
+	result = compileAndRun(`
+		push 1
+		push 10
+		jmpl 8
+		push 20
+		push 30
+		halt
+	`)
+	assertArrayMatch([...result], [30])
+})
+
+it('jmple', () => {
+	let result = compileAndRun(`
+		push 10
+		push 1
+		jmple 8
+		push 20
+		push 30
+		halt
+	`)
+	assertArrayMatch([...result], [20,30])
+
+	result = compileAndRun(`
+		push 10
+		push 10
+		jmple 8
+		push 20
+		push 30
+		halt
+	`)
+	assertArrayMatch([...result], [30])
+
+	result = compileAndRun(`
+		push 1
+		push 10
+		jmple 8
+		push 20
+		push 30
+		halt
+	`)
+	assertArrayMatch([...result], [30])
 })
 
 it.run()

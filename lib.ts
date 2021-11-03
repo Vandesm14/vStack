@@ -211,7 +211,7 @@ export const run = (program: Op[], opt?: runOptions) => {
 			else programPtr++
 		} else if (op === Op.Jmpnz) {
 			const a = pop()
-			if (a === 0) programPtr = program[programPtr]
+			if (a !== 0) programPtr = program[programPtr]
 			else programPtr++
 		} else if (op === Op.Jmpe) {
 			const a = pop()
@@ -256,7 +256,7 @@ export const run = (program: Op[], opt?: runOptions) => {
 			if (opt?.shorten) return stack.slice(0, stackPtr)
 			else return stack
 		} else if (op === Op.DEBUG) {
-			console.log('DEBUG:', {programPtr, stackPtr, stack})
+			console.log('DEBUG:', { programPtr, stackPtr, stack })
 		} else {
 			throw new Error(`Unknown op: "${op}"`)
 		}
