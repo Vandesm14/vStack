@@ -90,7 +90,10 @@ export const compile = (program: string): Op[] => {
 	const ops: (Op | string)[] = []
 
 	const labels = new Map<string, number>()
+	const lines = new Map<number, number>()
 	let instr = 0;
+
+	const isNumber = (s: string): boolean => !isNaN(Number(s))
 
 	const tryNumber = (value: string): number | string => {
 		if (value.indexOf('0x') === 1) {
@@ -102,8 +105,7 @@ export const compile = (program: string): Op[] => {
 		} else if (value.indexOf('\'') === 0) {
 			return value.slice(1, -1).charCodeAt(0)
 		} else {
-			const num = Number(value)
-			return Number.isNaN(num) ? value : num
+			return isNumber(value) ? Number(value) : value
 		}
 	}
 
@@ -120,6 +122,7 @@ export const compile = (program: string): Op[] => {
 			labels.set(op.slice(0, -1), instr)
 			continue
 		} else if (op && match) {
+			lines.set(Number(i), instr - 1)
 			// op overrides
 			if (op === 'spr' && /[+-]/.test(args[0])) { // if relative stack pointer
 				if (args[0].startsWith('+')) {
@@ -145,15 +148,17 @@ export const compile = (program: string): Op[] => {
 		const op = ops[i]
 		if (typeof op === 'string') {
 			if (op.indexOf('@') === 0) { // if address type
-				if (op.indexOf('+') === 1) { // if positive address
+				if (op.indexOf('+') === 1 || op.indexOf('-') === 1) { // if positive/negative address
 					ops[i] = Number(i) + Number(op.slice(1))
 					if (ops[i] < 0 || ops[i] >= ops.length) {
 						throw new RangeError(`Address out of bounds: ${op} at index: ${i}`)
 					}
-				} else if (op.indexOf('-') === 1) { // if negative address
-					ops[i] = Number(i) - Number(op.slice(1))
-					if (ops[i] < 0 || ops[i] >= ops.length) {
-						throw new RangeError(`Address out of bounds: ${op} at index: ${i}`)
+				} else if (isNumber(op.slice(1))) { // if line number
+					const line = lines.get(Number(op.slice(1)))
+					if (line === undefined) {
+						throw new RangeError(`Line number out of bounds: ${op} at index: ${i}`)
+					} else {
+						ops[i] = line
 					}
 				} else { // if label
 					const label = labels.get(op.slice(1))

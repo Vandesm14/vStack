@@ -5,31 +5,51 @@ const compileAndRun = (code: string, opt?: runOptions) => {
 	return run(compile(code), { shorten: true, ...opt })
 }
 
-it('relative jump', async ({ step }) => {
-	await step('jump to next line', () => {
+it('addresses', async ({ step }) => {
+	// TODO: test addresses of bounds errors
+
+	await step('positive relative addr', () => {
 		const result = compileAndRun(`
 			push 10
+			push @+3
 			push 20
-			push @+2
-			jmp
 			push 30
-			push 40
 			halt
 		`)
-		assertEquals([...result], [10,20,30,40])
+		assertEquals([...result], [10,6,20,30])
 	})
 
-	await step('jump past a line', () => {
+	await step('negative relative addr', () => {
 		const result = compileAndRun(`
 			push 10
 			push 20
-			push @+4
-			jmp
 			push 30
-			push 40
+			push @-5
 			halt
 		`)
-		assertEquals([...result], [10,20,40])
+		assertEquals([...result], [10,20,30,2])
+	})
+
+	await step('line relative addr (ahead)', () => {
+		const result = compileAndRun(`
+			push 10
+			push 20
+			push @4
+			push 30
+			halt
+		`)
+		assertEquals([...result], [10,20,6,30])
+	})
+
+	await step('line relative addr (behind)', () => {
+		const result = compileAndRun(`
+			push 10
+			push 20
+			push 30
+			push @3
+			halt
+		`)
+		assertEquals([...result], [10,20,30,4])
 	})
 })
 
