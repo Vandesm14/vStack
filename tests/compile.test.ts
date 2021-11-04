@@ -127,6 +127,40 @@ it('spr (relative stack pointer)', async ({ step }) => {
 	})
 })
 
+it('number formats', async ({ step }) => {
+	await step('0x', () => {
+		const result = compileAndRun(`
+			push 0x10
+			halt
+		`)
+		assertEquals([...result], [16])
+	})
+
+	await step('0b', () => {
+		const result = compileAndRun(`
+			push 0b10
+			halt
+		`)
+		assertEquals([...result], [2])
+	})
+
+	await step('0o', () => {
+		const result = compileAndRun(`
+			push 0o10
+			halt
+		`)
+		assertEquals([...result], [8])
+	})
+
+	await step('character', () => {
+		const result = compileAndRun(`
+			push 'a'
+			halt
+		`)
+		assertEquals([...result], [97])
+	})
+})
+
 // TODO: db tests
 
 it.run()

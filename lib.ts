@@ -93,8 +93,18 @@ export const compile = (program: string): Op[] => {
 	let instr = 0;
 
 	const tryNumber = (value: string): number | string => {
-		const num = Number(value)
-		return Number.isNaN(num) ? value : num
+		if (value.indexOf('0x') === 1) {
+			return parseInt(value.slice(2), 16)
+		} else if (value.indexOf('0b') === 1) {
+			return parseInt(value.slice(2), 2)
+		} else if (value.indexOf('0o') === 1) {
+			return parseInt(value.slice(2), 8)
+		} else if (value.indexOf('\'') === 0) {
+			return value.slice(1, -1).charCodeAt(0)
+		} else {
+			const num = Number(value)
+			return Number.isNaN(num) ? value : num
+		}
 	}
 
 	for (let i in program.split('\n')) {
