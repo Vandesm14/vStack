@@ -98,21 +98,21 @@ export const compile = (program: string): Op[] => {
 		let line = program.split('\n')[i].trim()
 		line = line.replace(/\r/g, '').trim().split(';')[0]
 		if (line === '') continue
-		const [op, ...args] = line.split(' ').filter(el => el !== '\n')
+		let [op, ...args] = line.split(' ').filter(el => el !== '\n')
 		const match = Ops.find(el => el.toLowerCase() === op.toLowerCase())
 
 		instr += op.endsWith(':') ? 0 : 1 // if label, don't increment
 
-		if (op.endsWith(':')) { // if label, add to labels
+		if (op.endsWith(':')) { // if label
 			labels.set(op.slice(0, -1), instr)
 			continue
 		} else if (op && match) {
 			// op overrides
 			if (op.startsWith('jmp') && /[+-]/.test(args[0])) { // if relative jump
-				ops.splice(Number(i), 0, Op.Push, instr + Number(args[0]) - args.length)
+				// ops.splice(Number(i), 0, Op.Push, instr + Number(args[0]))
+				ops.splice(Number(i) + 1, 0, Op.Push, instr + Number(args[0]) - args.length + 1)
 				ops.push(Op[match])
 			} else if (op === 'spr' && /[+-]/.test(args[0])) { // if relative stack pointer
-				// turn into repeated spi or spd to get the right number
 				if (args[0].startsWith('+')) {
 					for (let i = 0; i < Number(args[0].slice(1)); i++) {
 						ops.push(Op.Spi)
@@ -138,7 +138,7 @@ export const compile = (program: string): Op[] => {
 			if (op.startsWith('@')) {
 				const label = labels.get(op.slice(1))
 				if (label === undefined) throw new Error(`Unknown label: "${op}"`)
-				ops.splice(Number(i), 0, Op.Push, label)
+				ops.splice(Number(i), 1, label)
 			} else {
 				ops.splice(ops.indexOf(op), 1)
 			}

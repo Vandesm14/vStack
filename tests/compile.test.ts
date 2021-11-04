@@ -48,11 +48,13 @@ it('labels', async ({ step }) => {
 
 	await step('label with jump (in order)', () => {
 		const result = compileAndRun(`
-			jmp @start
+		push @start
+			jmp
 			start:
 				push 10
 				push 20
-				jmp @label
+				push @label
+				jmp
 				halt
 			label:
 				push 30
@@ -64,7 +66,8 @@ it('labels', async ({ step }) => {
 
 	await step('label with jump (reversed)', () => {
 		const result = compileAndRun(`
-			jmp @start
+		push @start
+			jmp
 			label:
 				push 30
 				push 40
@@ -72,7 +75,8 @@ it('labels', async ({ step }) => {
 			start:
 				push 10
 				push 20
-				jmp @label
+				push @label
+				jmp
 				halt
 		`)
 		assertEquals([...result], [10,20,30,40])
