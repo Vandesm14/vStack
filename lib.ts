@@ -94,7 +94,8 @@ export const compile = (program: string): Op[] => {
 		return Number.isNaN(num) ? value : num
 	}
 
-	for (let line of program.split('\n')) {
+	for (let i in program.split('\n')) {
+		let line = program.split('\n')[i].trim()
 		line = line.replace(/\r/g, '').trim().split(';')[0]
 		if (line === '') continue
 		const [op, ...args] = line.split(' ').filter(el => el !== '\n')
@@ -108,7 +109,8 @@ export const compile = (program: string): Op[] => {
 		} else if (op && match) {
 			// op overrides
 			if (op.startsWith('jmp') && /[+-]/.test(args[0])) { // if relative jump
-				ops.push(Op[match], instr + Number(args[0]) - args.length)
+				ops.splice(Number(i), 0, Op.Push, instr + Number(args[0]) - args.length)
+				ops.push(Op[match])
 			} else if (op === 'spr' && /[+-]/.test(args[0])) { // if relative stack pointer
 				// turn into repeated spi or spd to get the right number
 				if (args[0].startsWith('+')) {
@@ -136,7 +138,7 @@ export const compile = (program: string): Op[] => {
 			if (op.startsWith('@')) {
 				const label = labels.get(op.slice(1))
 				if (label === undefined) throw new Error(`Unknown label: "${op}"`)
-				ops[i] = label
+				ops.splice(Number(i), 0, Op.Push, label)
 			} else {
 				ops.splice(ops.indexOf(op), 1)
 			}
@@ -185,7 +187,7 @@ export const run = (program: Op[], opt?: runOptions) => {
 	while (ip < program.length) {
 		const op = program[ip++]
 
-		if (opt?.debug) console.log({ stack, sp, fp, program, ip, op, Instr: Op[op], arg: program[ip] }) // DEBUG
+		if (opt?.debug) console.log({ stack, sp, fp, program, ip: ip - 1, op, Instr: Op[op], arg: program[ip] }) // DEBUG
 
 		if (op === Op.Push) {
 			push(program[ip])
@@ -259,45 +261,46 @@ export const run = (program: Op[], opt?: runOptions) => {
 		} else if (op === Op.Spd) {
 			sp--
 		} else if (op === Op.Jmp) {
-			ip = program[ip]
+			const a = pop()
+			ip = a
 		} else if (op === Op.Jmpz) {
 			const a = pop()
-			if (a === 0) ip = program[ip]
-			else ip++
+			const b = pop()
+			if (b === 0) ip = a
 		} else if (op === Op.Jmpnz) {
 			const a = pop()
-			if (a !== 0) ip = program[ip]
-			else ip++
+			const b = pop()
+			if (b !== 0) ip = a
 		} else if (op === Op.Jmpe) {
 			const a = pop()
 			const b = pop()
-			if (b === a) ip = program[ip]
-			else ip++
+			const c = pop()
+			if (c === b) ip = a
 		} else if (op === Op.Jmpne) {
 			const a = pop()
 			const b = pop()
-			if (b !== a) ip = program[ip]
-			else ip++
+			const c = pop()
+			if (c !== b) ip = a
 		} else if (op === Op.Jmpg) {
 			const a = pop()
 			const b = pop()
-			if (b > a) ip = program[ip]
-			else ip++
+			const c = pop()
+			if (c > b) ip = a
 		} else if (op === Op.Jmpge) {
 			const a = pop()
 			const b = pop()
-			if (b >= a) ip = program[ip]
-			else ip++
+			const c = pop()
+			if (c >= b) ip = a
 		} else if (op === Op.Jmpl) {
 			const a = pop()
 			const b = pop()
-			if (b < a) ip = program[ip]
-			else ip++
+			const c = pop()
+			if (c < b) ip = a
 		} else if (op === Op.Jmple) {
 			const a = pop()
 			const b = pop()
-			if (b <= a) ip = program[ip]
-			else ip++
+			const c = pop()
+			if (c <= b) ip = a
 		} else if (op === Op.Proc) {
 			const a = pop()
 			push(ip)
@@ -307,9 +310,6 @@ export const run = (program: Op[], opt?: runOptions) => {
 			ip = pop()
 		} else if (op === Op.Read) {
 			// TODO: implement, does nothing at the moment
-			stack[sp] = program[ip]
-			ip++
-			sp++
 		} else if (op === Op.Write) {
 			// TODO: implement, does nothing at the moment
 			const a = pop()
@@ -318,7 +318,7 @@ export const run = (program: Op[], opt?: runOptions) => {
 			if (opt?.shorten) return stack.slice(0, sp)
 			else return stack
 		} else if (op === Op.DEBUG) {
-			console.log('DEBUG:', { ip, fp, sp, stack })
+			console.log('DEBUG:', { ip: ip - 1, fp, sp, stack })
 		} else {
 			throw new Error(`Unknown op: "${op}"`)
 		}

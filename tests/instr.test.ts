@@ -252,7 +252,8 @@ it('jmp', async ({ step }) => {
 	await step('jump to next line', () => {
 		const result = compileAndRun(`
 			push 10
-			jmp 4
+			push 5
+			jmp
 			push 20
 			push 30
 			halt
@@ -263,7 +264,8 @@ it('jmp', async ({ step }) => {
 	await step('jump past a line', () => {
 		const result = compileAndRun(`
 			push 10
-			jmp 6
+			push 7
+			jmp
 			push 20
 			push 30
 			halt
@@ -277,7 +279,8 @@ it('jmpz', async ({ step }) => {
 		const result = compileAndRun(`
 			push 10
 			push 0
-			jmpz 8
+			push 9
+			jmpz
 			push 20
 			push 30
 			halt
@@ -289,11 +292,12 @@ it('jmpz', async ({ step }) => {
 		const result = compileAndRun(`
 			push 10
 			push 1
-			jmpz 8
+			push 9
+			jmpz
 			push 20
 			push 30
 			halt
-		`)
+		`,{debug:true})
 		assertArrayMatch([...result], [10,20,30])
 	})
 })
@@ -303,7 +307,8 @@ it('jmpnz', async ({ step }) => {
 		const result = compileAndRun(`
 			push 10
 			push 0
-			jmpnz 8
+			push 9
+			jmpnz
 			push 20
 			push 30
 			halt
@@ -315,7 +320,8 @@ it('jmpnz', async ({ step }) => {
 		const result = compileAndRun(`
 			push 10
 			push 1
-			jmpnz 8
+			push 9
+			jmpnz
 			push 20
 			push 30
 			halt
@@ -329,7 +335,8 @@ it('jmpe', async ({ step }) => {
 		const result = compileAndRun(`
 			push 10
 			push 10
-			jmpe 8
+			push 9
+			jmpe
 			push 20
 			push 30
 			halt
@@ -341,7 +348,8 @@ it('jmpe', async ({ step }) => {
 		const result = compileAndRun(`
 			push 10
 			push 1
-			jmpe 8
+			push 9
+			jmpe
 			push 20
 			push 30
 			halt
@@ -355,7 +363,8 @@ it('jmpne', async ({ step }) => {
 		const result = compileAndRun(`
 			push 10
 			push 1
-			jmpne 8
+			push 9
+			jmpne
 			push 20
 			push 30
 			halt
@@ -367,7 +376,8 @@ it('jmpne', async ({ step }) => {
 		const result = compileAndRun(`
 			push 10
 			push 10
-			jmpne 8
+			push 9
+			jmpne
 			push 20
 			push 30
 			halt
@@ -381,7 +391,8 @@ it('jmpg', async ({ step }) => {
 		const result = compileAndRun(`
 			push 10
 			push 1
-			jmpg 8
+			push 9
+			jmpg
 			push 20
 			push 30
 			halt
@@ -393,7 +404,8 @@ it('jmpg', async ({ step }) => {
 		const result = compileAndRun(`
 			push 10
 			push 10
-			jmpg 8
+			push 9
+			jmpg
 			push 20
 			push 30
 			halt
@@ -407,7 +419,8 @@ it('jmpge', async ({ step }) => {
 		const result = compileAndRun(`
 			push 10
 			push 1
-			jmpge 8
+			push 9
+			jmpge
 			push 20
 			push 30
 			halt
@@ -419,7 +432,8 @@ it('jmpge', async ({ step }) => {
 		const result = compileAndRun(`
 			push 10
 			push 10
-			jmpge 8
+			push 9
+			jmpge
 			push 20
 			push 30
 			halt
@@ -431,7 +445,8 @@ it('jmpge', async ({ step }) => {
 		const result = compileAndRun(`
 			push 10
 			push 11
-			jmpge 8
+			push 9
+			jmpge
 			push 20
 			push 30
 			halt
@@ -445,7 +460,8 @@ it('jmpl', async ({ step }) => {
 		const result = compileAndRun(`
 			push 1
 			push 10
-			jmpl 8
+			push 9
+			jmpl
 			push 20
 			push 30
 			halt
@@ -454,10 +470,11 @@ it('jmpl', async ({ step }) => {
 	})
 
 	await step('if not less than', () => {
-		let result = compileAndRun(`
+		const result = compileAndRun(`
 			push 10
 			push 10
-			jmpl 8
+			push 9
+			jmpl
 			push 20
 			push 30
 			halt
@@ -471,7 +488,8 @@ it('jmple', async ({ step }) => {
 		const result = compileAndRun(`
 			push 1
 			push 10
-			jmple 8
+			push 9
+			jmple
 			push 20
 			push 30
 			halt
@@ -483,7 +501,8 @@ it('jmple', async ({ step }) => {
 		const result = compileAndRun(`
 			push 10
 			push 10
-			jmple 8
+			push 9
+			jmple
 			push 20
 			push 30
 			halt
@@ -495,7 +514,8 @@ it('jmple', async ({ step }) => {
 		const result = compileAndRun(`
 			push 10
 			push 1
-			jmple 8
+			push 9
+			jmple
 			push 20
 			push 30
 			halt
