@@ -87,16 +87,6 @@ it('div', () => {
 	assertArrayMatch([...result], [2])
 })
 
-it('swp', () => {
-	const result = compileAndRun(`
-		push 20
-		push 10
-		swp
-		halt
-	`)
-	assertArrayMatch([...result], [10,20])
-})
-
 it('inc', () => {
 	const result = compileAndRun(`
 		push 10
@@ -113,25 +103,6 @@ it('dec', () => {
 		halt
 	`)
 	assertArrayMatch([...result], [9])
-})
-
-it('dup', () => {
-	const result = compileAndRun(`
-		push 10
-		dup
-		halt
-	`)
-	assertArrayMatch([...result], [10,10])
-})
-
-it('dup2', () => {
-	const result = compileAndRun(`
-		push 10
-		push 20
-		dup2
-		halt
-	`)
-	assertArrayMatch([...result], [10,20,10,20])
 })
 
 it('shl', () => {
@@ -246,6 +217,56 @@ it('spd', () => {
 		halt
 	`)
 	assertArrayMatch([...result], [10])
+})
+
+it('swp', () => {
+	const result = compileAndRun(`
+		push 20
+		push 10
+		swp
+		halt
+	`)
+	assertArrayMatch([...result], [10,20])
+})
+
+it('dup', () => {
+	const result = compileAndRun(`
+		push 10
+		dup
+		halt
+	`)
+	assertArrayMatch([...result], [10,10])
+})
+
+it('dup2', () => {
+	const result = compileAndRun(`
+		push 10
+		push 20
+		dup2
+		halt
+	`)
+	assertArrayMatch([...result], [10,20,10,20])
+})
+
+it('over', () => {
+	const result = compileAndRun(`
+		push 10
+		push 20
+		over
+		halt
+	`)
+	assertArrayMatch([...result], [10,20,10])
+})
+
+it('rot', () => {
+	const result = compileAndRun(`
+		push 10
+		push 20
+		push 30
+		rot
+		halt
+	`)
+	assertArrayMatch([...result], [20,30,10])
 })
 
 it('jmp', async ({ step }) => {

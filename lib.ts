@@ -14,16 +14,10 @@ export enum Op {
 	Mul,
 	/** divide top two values from stack, push the result to the stack, and pop the first value: a op b = rslt: [a, b] => [rslt] */
 	Div,
-	/** swaps the top two values on the stack: [a, b] => [b, a] */
-	Swp,
 	/** increment the value at the top of the stack by 1 */
 	Inc,
 	/** decrement the value at the top of the stack by 1 */
 	Dec,
-	/** duplicate the value at the top of the stack */
-	Dup,
-	/** duplicate the top two values from the stack */
-	Dup2,
 	/** biitwise shoft left the value at the top of the stack */
 	Shl,
 	/** biitwise shoft right the value at the top of the stack */
@@ -46,6 +40,16 @@ export enum Op {
 	Spi,
 	/** deccrenemt the stack pointer by 1 */
 	Spd,
+	/** swaps the top two values on the stack: [a, b] => [b, a] */
+	Swp,
+	/** duplicate the value at the top of the stack */
+	Dup,
+	/** duplicate the top two values from the stack */
+	Dup2,
+	/** Sorry */
+	Over,
+	/** Sorry */
+	Rot,
 
 	/** jump to address */
 	Jmp,
@@ -111,7 +115,7 @@ export const compile = (program: string): Op[] => {
 
 	for (let i in program.split('\n')) {
 		let line = program.split('\n')[i].trim()
-		line = line.replace(/\r/g, '').trim().split(';')[0]
+		line = line.replace(/\r/g, '').split(';')[0].trim()
 		if (line === '') continue
 		const [op, ...args] = line.split(' ').filter(el => el !== '\n')
 		const match = Ops.find(el => el.toLowerCase() === op.toLowerCase())
@@ -236,28 +240,12 @@ export const run = (program: Op[], opt?: runOptions) => {
 			const a = pop()
 			const b = pop()
 			push(b / a)
-		} else if (op === Op.Swp) {
-			const a = pop()
-			const b = pop()
-			push(a)
-			push(b)
 		} else if (op === Op.Inc) {
 			const a = pop()
 			push(a + 1)
 		} else if (op === Op.Dec) {
 			const a = pop()
 			push(a - 1)
-		} else if (op === Op.Dup) {
-			const a = pop()
-			push(a)
-			push(a)
-		} else if (op === Op.Dup2) {
-			const a = pop()
-			const b = pop()
-			push(b)
-			push(a)
-			push(b)
-			push(a)
 		} else if (op === Op.Shl) {
 			const a = pop()
 			push(a << 1)
@@ -286,6 +274,35 @@ export const run = (program: Op[], opt?: runOptions) => {
 			sp++
 		} else if (op === Op.Spd) {
 			sp--
+		} else if (op === Op.Swp) {
+			const a = pop()
+			const b = pop()
+			push(a)
+			push(b)
+		} else if (op === Op.Dup) {
+			const a = pop()
+			push(a)
+			push(a)
+		} else if (op === Op.Dup2) {
+			const a = pop()
+			const b = pop()
+			push(b)
+			push(a)
+			push(b)
+			push(a)
+		} else if (op === Op.Over) { // a b => a b a
+			const a = pop()
+			const b = pop()
+			push(b)
+			push(a)
+			push(b)
+		} else if (op === Op.Rot) {
+			const a = pop()
+			const b = pop()
+			const c = pop()
+			push(b)
+			push(a)
+			push(c)
 		} else if (op === Op.Jmp) {
 			const a = pop()
 			ip = a
