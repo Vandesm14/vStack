@@ -71,6 +71,9 @@ export enum Op {
 	/** terminates a subroutine */
 	Ret,
 
+	/** defines a variable (value is inserted at compile-time) */
+	Db,
+
 	/** read value from the buss at address and push it to the stack */
 	Read,
 	/** write value from the stack to the bus at address */
