@@ -5,11 +5,7 @@ const compileAndRun = (code: string, opt?: runOptions) => {
 	return run(compile(code), { shorten: true, ...opt })
 }
 
-const asUint = (n: number) => {
-	return n & 0xff
-}
-
-it('jmp line/op', async ({ step }) => {
+it('relative jump', async ({ step }) => {
 	await step('jump to next line', () => {
 		const result = compileAndRun(`
 			push 10
@@ -36,7 +32,7 @@ it('jmp line/op', async ({ step }) => {
 })
 
 //test labels
-it('label', async ({ step }) => {
+it('labels', async ({ step }) => {
 	await step('label without jump', () => {
 		const result = compileAndRun(`
 			label:

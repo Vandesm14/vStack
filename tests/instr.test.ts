@@ -194,17 +194,6 @@ it('not', () => {
 // TODO: Implement stkp, stki, stkd
 
 it('jmp', async ({ step }) => {
-	await step('jump past a line', () => {
-		const result = compileAndRun(`
-			push 10
-			jmp 6
-			push 20
-			push 30
-			halt
-		`)
-		assertArrayMatch([...result], [10,30])
-	})
-
 	await step('jump to next line', () => {
 		const result = compileAndRun(`
 			push 10
@@ -214,6 +203,17 @@ it('jmp', async ({ step }) => {
 			halt
 		`)
 		assertArrayMatch([...result], [10,20,30])
+	})
+
+	await step('jump past a line', () => {
+		const result = compileAndRun(`
+			push 10
+			jmp 6
+			push 20
+			push 30
+			halt
+		`)
+		assertArrayMatch([...result], [10,30])
 	})
 })
 
@@ -296,18 +296,6 @@ it('jmpe', async ({ step }) => {
 })
 
 it('jmpne', async ({ step }) => {
-	await step('if equal', () => {
-		const result = compileAndRun(`
-			push 10
-			push 10
-			jmpne 8
-			push 20
-			push 30
-			halt
-		`)
-		assertArrayMatch([...result], [20,30])
-	})
-
 	await step('if not equal', () => {
 		const result = compileAndRun(`
 			push 10
@@ -319,9 +307,33 @@ it('jmpne', async ({ step }) => {
 		`)
 		assertArrayMatch([...result], [30])
 	})
+
+	await step('if equal', () => {
+		const result = compileAndRun(`
+			push 10
+			push 10
+			jmpne 8
+			push 20
+			push 30
+			halt
+		`)
+		assertArrayMatch([...result], [20,30])
+	})
 })
 
 it('jmpg', async ({ step }) => {
+	await step('if greater than', () => {
+		const result = compileAndRun(`
+			push 10
+			push 1
+			jmpg 8
+			push 20
+			push 30
+			halt
+		`)
+		assertArrayMatch([...result], [30])
+	})
+
 	await step('if not greater than', () => {
 		const result = compileAndRun(`
 			push 10
@@ -333,21 +345,33 @@ it('jmpg', async ({ step }) => {
 		`)
 		assertArrayMatch([...result], [20,30])
 	})
+})
 
+it('jmpge', async ({ step }) => {
 	await step('if greater than', () => {
 		const result = compileAndRun(`
 			push 10
 			push 1
-			jmpg 8
+			jmpge 8
 			push 20
 			push 30
 			halt
 		`)
 		assertArrayMatch([...result], [30])
 	})
-})
 
-it('jmpge', async ({ step }) => {
+	await step('if equal', () => {
+		const result = compileAndRun(`
+			push 10
+			push 10
+			jmpge 8
+			push 20
+			push 30
+			halt
+		`)
+		assertArrayMatch([...result], [30])
+	})
+
 	await step('if not greater than or equal', () => {
 		const result = compileAndRun(`
 			push 10
@@ -359,33 +383,21 @@ it('jmpge', async ({ step }) => {
 		`)
 		assertArrayMatch([...result], [20,30])
 	})
-
-	await step('if equal', () => {
-		const result = compileAndRun(`
-			push 10
-			push 10
-			jmpge 8
-			push 20
-			push 30
-			halt
-		`)
-		assertArrayMatch([...result], [30])
-	})
-
-	await step('if greater than', () => {
-		const result = compileAndRun(`
-			push 10
-			push 1
-			jmpge 8
-			push 20
-			push 30
-			halt
-		`)
-		assertArrayMatch([...result], [30])
-	})
 })
 
 it('jmpl', async ({ step }) => {
+	await step('if less than', () => {
+		const result = compileAndRun(`
+			push 1
+			push 10
+			jmpl 8
+			push 20
+			push 30
+			halt
+		`)
+		assertArrayMatch([...result], [30])
+	})
+
 	await step('if not less than', () => {
 		let result = compileAndRun(`
 			push 10
@@ -397,31 +409,19 @@ it('jmpl', async ({ step }) => {
 		`)
 		assertArrayMatch([...result], [20,30])
 	})
+})
 
+it('jmple', async ({ step }) => {
 	await step('if less than', () => {
 		const result = compileAndRun(`
 			push 1
 			push 10
-			jmpl 8
-			push 20
-			push 30
-			halt
-		`)
-		assertArrayMatch([...result], [30])
-	})
-})
-
-it('jmple', async ({ step }) => {
-	await step('if not less than or equal', () => {
-		const result = compileAndRun(`
-			push 10
-			push 1
 			jmple 8
 			push 20
 			push 30
 			halt
 		`)
-		assertArrayMatch([...result], [20,30])
+		assertArrayMatch([...result], [30])
 	})
 
 	await step('if equal', () => {
@@ -436,16 +436,16 @@ it('jmple', async ({ step }) => {
 		assertArrayMatch([...result], [30])
 	})
 
-	await step('if less than', () => {
+	await step('if not less than or equal', () => {
 		const result = compileAndRun(`
-			push 1
 			push 10
+			push 1
 			jmple 8
 			push 20
 			push 30
 			halt
 		`)
-		assertArrayMatch([...result], [30])
+		assertArrayMatch([...result], [20,30])
 	})
 })
 
