@@ -98,7 +98,7 @@ export const compile = (program: string): Op[] => {
 		let line = program.split('\n')[i].trim()
 		line = line.replace(/\r/g, '').trim().split(';')[0]
 		if (line === '') continue
-		let [op, ...args] = line.split(' ').filter(el => el !== '\n')
+		const [op, ...args] = line.split(' ').filter(el => el !== '\n')
 		const match = Ops.find(el => el.toLowerCase() === op.toLowerCase())
 
 		instr += op.endsWith(':') ? 0 : 1 // if label, don't increment
@@ -108,11 +108,7 @@ export const compile = (program: string): Op[] => {
 			continue
 		} else if (op && match) {
 			// op overrides
-			if (op.startsWith('jmp') && /[+-]/.test(args[0])) { // if relative jump
-				// ops.splice(Number(i), 0, Op.Push, instr + Number(args[0]))
-				ops.splice(Number(i) + 1, 0, Op.Push, instr + Number(args[0]) - args.length + 1)
-				ops.push(Op[match])
-			} else if (op === 'spr' && /[+-]/.test(args[0])) { // if relative stack pointer
+			if (op === 'spr' && /[+-]/.test(args[0])) { // if relative stack pointer
 				if (args[0].startsWith('+')) {
 					for (let i = 0; i < Number(args[0].slice(1)); i++) {
 						ops.push(Op.Spi)
@@ -126,7 +122,7 @@ export const compile = (program: string): Op[] => {
 				ops.push(Op[match], ...args.map(tryNumber))
 			}
 		} else {
-			throw new SyntaxError(`Unknown op: "${op}"`)
+			throw new SyntaxError(`Unknown op: "${op}" on line ${i}`)
 		}
 
 		instr += args.length
@@ -135,10 +131,16 @@ export const compile = (program: string): Op[] => {
 	for (const i in ops) {
 		const op = ops[i]
 		if (typeof op === 'string') {
-			if (op.startsWith('@')) {
-				const label = labels.get(op.slice(1))
-				if (label === undefined) throw new Error(`Unknown label: "${op}"`)
-				ops.splice(Number(i), 1, label)
+			if (op.indexOf('@') === 0) { // if address type
+				if (op.indexOf('+') === 1) { // if positive address
+					ops[i] = Number(i) + Number(op.slice(1))
+				} else if (op.indexOf('-') === 1) { // if negative address
+					ops[i] = Number(i) - Number(op.slice(1))
+				} else { // if label
+					const label = labels.get(op.slice(1))
+					if (label === undefined) throw new SyntaxError(`Unknown label: "${op}" at index: ${i}`)
+					ops[i] = label
+				}
 			} else {
 				ops.splice(ops.indexOf(op), 1)
 			}

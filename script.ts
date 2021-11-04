@@ -1,18 +1,13 @@
 import { run, compile, Op } from './lib.ts'
 
 const program: Op[] = compile(`
-	push @start
+	push 10
+	push 20
+	push @+2
 	jmp
-	label:
-		push 30
-		push 40
-		halt
-	start:
-		push 10
-		push 20
-		push @label
-		jmp
-		halt
+	push 30
+	push 40
+	halt
 `)
 console.log('program:', program)
 

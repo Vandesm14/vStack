@@ -10,7 +10,8 @@ it('relative jump', async ({ step }) => {
 		const result = compileAndRun(`
 			push 10
 			push 20
-			jmp +2
+			push @+2
+			jmp
 			push 30
 			push 40
 			halt
@@ -22,7 +23,8 @@ it('relative jump', async ({ step }) => {
 		const result = compileAndRun(`
 			push 10
 			push 20
-			jmp +4
+			push @+4
+			jmp
 			push 30
 			push 40
 			halt
@@ -48,7 +50,7 @@ it('labels', async ({ step }) => {
 
 	await step('label with jump (in order)', () => {
 		const result = compileAndRun(`
-		push @start
+			push @start
 			jmp
 			start:
 				push 10
