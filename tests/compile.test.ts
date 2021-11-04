@@ -15,7 +15,7 @@ it('relative jump', async ({ step }) => {
 			push 40
 			halt
 		`)
-		assertEquals([...result], [10, 20, 30, 40])
+		assertEquals([...result], [10,20,30,40])
 	})
 
 	await step('jump past a line', () => {
@@ -27,7 +27,7 @@ it('relative jump', async ({ step }) => {
 			push 40
 			halt
 		`)
-		assertEquals([...result], [10, 20, 40])
+		assertEquals([...result], [10,20,40])
 	})
 })
 
@@ -43,7 +43,7 @@ it('labels', async ({ step }) => {
 				push 40
 				halt
 		`)
-		assertEquals([...result], [10, 20, 30, 40])
+		assertEquals([...result], [10,20,30,40])
 	})
 
 	await step('label with jump (in order)', () => {
@@ -59,7 +59,7 @@ it('labels', async ({ step }) => {
 				push 40
 				halt
 		`)
-		assertEquals([...result], [10, 20, 30, 40])
+		assertEquals([...result], [10,20,30,40])
 	})
 
 	await step('label with jump (reversed)', () => {
@@ -75,7 +75,49 @@ it('labels', async ({ step }) => {
 				jmp @label
 				halt
 		`)
-		assertEquals([...result], [10, 20, 30, 40])
+		assertEquals([...result], [10,20,30,40])
+	})
+})
+
+it('spr (relative stack pointer)', async ({ step }) => {
+	await step('sp +1', () => {
+		const result = compileAndRun(`
+			push 10
+			push 20
+			spr +1
+			halt
+		`)
+		assertEquals([...result], [10,20,0])
+	})
+
+	await step('sp +2', () => {
+		const result = compileAndRun(`
+			push 10
+			push 20
+			spr +2
+			halt
+		`)
+		assertEquals([...result], [10,20,0,0])
+	})
+
+	await step('sp -1', () => {
+		const result = compileAndRun(`
+			push 10
+			push 20
+			spr -1
+			halt
+		`)
+		assertEquals([...result], [10])
+	})
+
+	await step('sp -2', () => {
+		const result = compileAndRun(`
+			push 10
+			push 20
+			spr -2
+			halt
+		`)
+		assertEquals([...result], [])
 	})
 })
 

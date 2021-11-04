@@ -191,7 +191,62 @@ it('not', () => {
 	assertArrayMatch([...result], [asUint(~10)])
 })
 
-// TODO: Implement stkp, stki, stkd
+// TODO: Implement sp
+it('sp', async ({ step }) => {
+	await step('set zero', () => {
+		const result = compileAndRun(`
+			push 10
+			push 20
+			push 0
+			sp
+			halt
+		`)
+		assertArrayMatch([...result], [10,20])
+	})
+
+	await step('set zero (+spi)', () => {
+		const result = compileAndRun(`
+			push 10
+			push 20
+			spi
+			push 0
+			sp
+			halt
+		`)
+		assertArrayMatch([...result], [10,20])
+	})
+
+	await step('set one', () => {
+		const result = compileAndRun(`
+			push 10
+			push 20
+			push 1
+			sp
+			halt
+		`)
+		assertArrayMatch([...result], [10])
+	})
+})
+
+it('spi', () => {
+	const result = compileAndRun(`
+		push 10
+		push 20
+		spi
+		halt
+	`)
+	assertArrayMatch([...result], [10,20,0])
+})
+
+it('spd', () => {
+	const result = compileAndRun(`
+		push 10
+		push 20
+		spd
+		halt
+	`)
+	assertArrayMatch([...result], [10])
+})
 
 it('jmp', async ({ step }) => {
 	await step('jump to next line', () => {
