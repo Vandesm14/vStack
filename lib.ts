@@ -214,10 +214,21 @@ export const run = (program: Op[], opt?: runOptions) => {
 		stack[sp++] = value
 	}
 
+	const debug = (op: number) => console.log('DEBUG:', {
+		stack: opt?.shorten ? stack.slice(0, sp) : stack,
+		sp,
+		fp,
+		program,
+		ip: ip - 1,
+		op,
+		Instr: Op[op],
+		arg: program[ip],
+	})
+
 	while (ip < program.length) {
 		const op = program[ip++]
 
-		if (opt?.debug) console.log({ stack, sp, fp, program, ip: ip - 1, op, Instr: Op[op], arg: program[ip] }) // DEBUG
+		if (opt?.debug) debug(op)
 
 		if (op === Op.Push) {
 			push(program[ip])
@@ -290,13 +301,13 @@ export const run = (program: Op[], opt?: runOptions) => {
 			push(a)
 			push(b)
 			push(a)
-		} else if (op === Op.Over) { // a b => a b a
+		} else if (op === Op.Over) { // a b => a b a (2nd last to top)
 			const a = pop()
 			const b = pop()
 			push(b)
 			push(a)
 			push(b)
-		} else if (op === Op.Rot) {
+		} else if (op === Op.Rot) { // a b c => b c a (3rd last to top)
 			const a = pop()
 			const b = pop()
 			const c = pop()
@@ -361,7 +372,7 @@ export const run = (program: Op[], opt?: runOptions) => {
 			if (opt?.shorten) return stack.slice(0, sp)
 			else return stack
 		} else if (op === Op.DEBUG) {
-			console.log('DEBUG:', { ip: ip - 1, fp, sp, stack })
+			debug(op)
 		} else {
 			throw new Error(`Unknown op: "${op}"`)
 		}
