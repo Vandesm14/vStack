@@ -137,15 +137,21 @@ export const compile = (program: string): Op[] => {
 			if (op.indexOf('@') === 0) { // if address type
 				if (op.indexOf('+') === 1) { // if positive address
 					ops[i] = Number(i) + Number(op.slice(1))
+					if (ops[i] < 0 || ops[i] >= ops.length) {
+						throw new RangeError(`Address out of bounds: ${op} at index: ${i}`)
+					}
 				} else if (op.indexOf('-') === 1) { // if negative address
 					ops[i] = Number(i) - Number(op.slice(1))
+					if (ops[i] < 0 || ops[i] >= ops.length) {
+						throw new RangeError(`Address out of bounds: ${op} at index: ${i}`)
+					}
 				} else { // if label
 					const label = labels.get(op.slice(1))
 					if (label === undefined) throw new SyntaxError(`Unknown label: "${op}" at index: ${i}`)
 					ops[i] = label
 				}
 			} else {
-				ops.splice(ops.indexOf(op), 1)
+				throw new SyntaxError(`Unknown datatype: "${op}" at index: ${i}`)
 			}
 		}
 	}
