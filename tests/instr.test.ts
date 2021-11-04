@@ -10,7 +10,7 @@ const assertArrayMatch = (a: number[], b: number[]) => {
 }
 
 const asUint = (n: number) => {
-	return n & 0xff
+	return n & 0xffff
 }
 
 it('halt', async ({ step }) => {

@@ -160,8 +160,8 @@ export interface runOptions {
 }
 
 export const run = (program: Op[], opt?: runOptions) => {
-	const stack = new Uint8Array(STACK_SIZE)
-	const bus = new Uint8Array(BUS_SIZE)
+	const stack = new Uint16Array(STACK_SIZE)
+	const bus = new Uint16Array(BUS_SIZE)
 
 	let sp = 0
 	let fp = 0 // used to track the end of a stack independent of the stack pointer
