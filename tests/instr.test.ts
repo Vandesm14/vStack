@@ -297,7 +297,7 @@ it('jmpz', async ({ step }) => {
 			push 20
 			push 30
 			halt
-		`,{debug:true})
+		`)
 		assertArrayMatch([...result], [10,20,30])
 	})
 })
