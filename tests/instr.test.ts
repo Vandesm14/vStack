@@ -9,21 +9,24 @@ const assertArrayMatch = (a: number[], b: number[]) => {
 	assertObjectMatch({ value: a }, { value: b })
 }
 
-// turn a number into a uint8
 const asUint = (n: number) => {
 	return n & 0xff
 }
 
-it('halt', () => {
-	let result = compileAndRun(`
-		halt
-	`)
-	assertArrayMatch([...result], [])
+it('halt', async ({ step }) => {
+	await step('normal halt', () => {
+		const result = compileAndRun(`
+			halt
+		`)
+		assertArrayMatch([...result], [])
+	})
 
-	result = compileAndRun(`
-		halt
-	`, { shorten: false })
-	assertArrayMatch([...result], new Array(256).fill(0))
+	await step('halt w/ shorten opt', () => {
+		const result = compileAndRun(`
+			halt
+		`, { shorten: false })
+		assertArrayMatch([...result], new Array(256).fill(0))
+	})
 })
 
 it('push', () => {
@@ -190,220 +193,260 @@ it('not', () => {
 
 // TODO: Implement stkp, stki, stkd
 
-it('jmp', () => {
-	let result = compileAndRun(`
-		push 10
-		jmp 6
-		push 20
-		push 30
-		halt
-	`)
-	assertArrayMatch([...result], [10,30])
+it('jmp', async ({ step }) => {
+	await step('jump past a line', () => {
+		const result = compileAndRun(`
+			push 10
+			jmp 6
+			push 20
+			push 30
+			halt
+		`)
+		assertArrayMatch([...result], [10,30])
+	})
 
-	result = compileAndRun(`
-		push 10
-		jmp 4
-		push 20
-		push 30
-		halt
-	`)
-	assertArrayMatch([...result], [10,20,30])
+	await step('jump to next line', () => {
+		const result = compileAndRun(`
+			push 10
+			jmp 4
+			push 20
+			push 30
+			halt
+		`)
+		assertArrayMatch([...result], [10,20,30])
+	})
 })
 
-it('jmpz', () => {
-	let result = compileAndRun(`
-		push 10
-		push 0
-		jmpz 8
-		push 20
-		push 30
-		halt
-	`)
-	assertArrayMatch([...result], [10,30])
+it('jmpz', async ({ step }) => {
+	await step('if zero', () => {
+		const result = compileAndRun(`
+			push 10
+			push 0
+			jmpz 8
+			push 20
+			push 30
+			halt
+		`)
+		assertArrayMatch([...result], [10,30])
+	})
 
-	result = compileAndRun(`
-		push 10
-		push 1
-		jmpz 8
-		push 20
-		push 30
-		halt
-	`)
-	assertArrayMatch([...result], [10,20,30])
+	await step('if not zero', () => {
+		const result = compileAndRun(`
+			push 10
+			push 1
+			jmpz 8
+			push 20
+			push 30
+			halt
+		`)
+		assertArrayMatch([...result], [10,20,30])
+	})
 })
 
-it('jmpnz', () => {
-	let result = compileAndRun(`
-		push 10
-		push 0
-		jmpnz 8
-		push 20
-		push 30
-		halt
-	`)
-	assertArrayMatch([...result], [10,20,30])
+it('jmpnz', async ({ step }) => {
+	await step('if not zero', () => {
+		const result = compileAndRun(`
+			push 10
+			push 0
+			jmpnz 8
+			push 20
+			push 30
+			halt
+		`)
+		assertArrayMatch([...result], [10,20,30])
+	})
 
-	result = compileAndRun(`
-		push 10
-		push 1
-		jmpnz 8
-		push 20
-		push 30
-		halt
-	`)
-	assertArrayMatch([...result], [10,30])
+	await step('if zero', () => {
+		const result = compileAndRun(`
+			push 10
+			push 1
+			jmpnz 8
+			push 20
+			push 30
+			halt
+		`)
+		assertArrayMatch([...result], [10,30])
+	})
 })
 
-it('jmpe', () => {
-	let result = compileAndRun(`
-		push 10
-		push 10
-		jmpe 8
-		push 20
-		push 30
-		halt
-	`)
-	assertArrayMatch([...result], [30])
+it('jmpe', async ({ step }) => {
+	await step('if equal', () => {
+		const result = compileAndRun(`
+			push 10
+			push 10
+			jmpe 8
+			push 20
+			push 30
+			halt
+		`)
+		assertArrayMatch([...result], [30])
+	})
 
-	result = compileAndRun(`
-		push 10
-		push 1
-		jmpe 8
-		push 20
-		push 30
-		halt
-	`)
-	assertArrayMatch([...result], [20,30])
+	await step('if not equal', () => {
+		const result = compileAndRun(`
+			push 10
+			push 1
+			jmpe 8
+			push 20
+			push 30
+			halt
+		`)
+		assertArrayMatch([...result], [20,30])
+	})
 })
 
-it('jmpne', () => {
-	let result = compileAndRun(`
-		push 10
-		push 10
-		jmpne 8
-		push 20
-		push 30
-		halt
-	`)
-	assertArrayMatch([...result], [20,30])
+it('jmpne', async ({ step }) => {
+	await step('if equal', () => {
+		const result = compileAndRun(`
+			push 10
+			push 10
+			jmpne 8
+			push 20
+			push 30
+			halt
+		`)
+		assertArrayMatch([...result], [20,30])
+	})
 
-	result = compileAndRun(`
-		push 10
-		push 1
-		jmpne 8
-		push 20
-		push 30
-		halt
-	`)
-	assertArrayMatch([...result], [30])
+	await step('if not equal', () => {
+		const result = compileAndRun(`
+			push 10
+			push 1
+			jmpne 8
+			push 20
+			push 30
+			halt
+		`)
+		assertArrayMatch([...result], [30])
+	})
 })
 
-it('jmpg', () => {
-	let result = compileAndRun(`
-		push 10
-		push 10
-		jmpg 8
-		push 20
-		push 30
-		halt
-	`)
-	assertArrayMatch([...result], [20,30])
+it('jmpg', async ({ step }) => {
+	await step('if not greater than', () => {
+		const result = compileAndRun(`
+			push 10
+			push 10
+			jmpg 8
+			push 20
+			push 30
+			halt
+		`)
+		assertArrayMatch([...result], [20,30])
+	})
 
-	result = compileAndRun(`
-		push 10
-		push 1
-		jmpg 8
-		push 20
-		push 30
-		halt
-	`)
-	assertArrayMatch([...result], [30])
+	await step('if greater than', () => {
+		const result = compileAndRun(`
+			push 10
+			push 1
+			jmpg 8
+			push 20
+			push 30
+			halt
+		`)
+		assertArrayMatch([...result], [30])
+	})
 })
 
-it('jmpge', () => {
-	let result = compileAndRun(`
-		push 10
-		push 11
-		jmpge 8
-		push 20
-		push 30
-		halt
-	`)
-	assertArrayMatch([...result], [20,30])
+it('jmpge', async ({ step }) => {
+	await step('if not greater than or equal', () => {
+		const result = compileAndRun(`
+			push 10
+			push 11
+			jmpge 8
+			push 20
+			push 30
+			halt
+		`)
+		assertArrayMatch([...result], [20,30])
+	})
 
-	result = compileAndRun(`
-		push 10
-		push 10
-		jmpge 8
-		push 20
-		push 30
-		halt
-	`)
-	assertArrayMatch([...result], [30])
+	await step('if equal', () => {
+		const result = compileAndRun(`
+			push 10
+			push 10
+			jmpge 8
+			push 20
+			push 30
+			halt
+		`)
+		assertArrayMatch([...result], [30])
+	})
 
-	result = compileAndRun(`
-		push 10
-		push 1
-		jmpge 8
-		push 20
-		push 30
-		halt
-	`)
-	assertArrayMatch([...result], [30])
+	await step('if greater than', () => {
+		const result = compileAndRun(`
+			push 10
+			push 1
+			jmpge 8
+			push 20
+			push 30
+			halt
+		`)
+		assertArrayMatch([...result], [30])
+	})
 })
 
-it('jmpl', () => {
-	let result = compileAndRun(`
-		push 10
-		push 10
-		jmpl 8
-		push 20
-		push 30
-		halt
-	`)
-	assertArrayMatch([...result], [20,30])
+it('jmpl', async ({ step }) => {
+	await step('if not less than', () => {
+		let result = compileAndRun(`
+			push 10
+			push 10
+			jmpl 8
+			push 20
+			push 30
+			halt
+		`)
+		assertArrayMatch([...result], [20,30])
+	})
 
-	result = compileAndRun(`
-		push 1
-		push 10
-		jmpl 8
-		push 20
-		push 30
-		halt
-	`)
-	assertArrayMatch([...result], [30])
+	await step('if less than', () => {
+		const result = compileAndRun(`
+			push 1
+			push 10
+			jmpl 8
+			push 20
+			push 30
+			halt
+		`)
+		assertArrayMatch([...result], [30])
+	})
 })
 
-it('jmple', () => {
-	let result = compileAndRun(`
-		push 10
-		push 1
-		jmple 8
-		push 20
-		push 30
-		halt
-	`)
-	assertArrayMatch([...result], [20,30])
+it('jmple', async ({ step }) => {
+	await step('if not less than or equal', () => {
+		const result = compileAndRun(`
+			push 10
+			push 1
+			jmple 8
+			push 20
+			push 30
+			halt
+		`)
+		assertArrayMatch([...result], [20,30])
+	})
 
-	result = compileAndRun(`
-		push 10
-		push 10
-		jmple 8
-		push 20
-		push 30
-		halt
-	`)
-	assertArrayMatch([...result], [30])
+	await step('if equal', () => {
+		const result = compileAndRun(`
+			push 10
+			push 10
+			jmple 8
+			push 20
+			push 30
+			halt
+		`)
+		assertArrayMatch([...result], [30])
+	})
 
-	result = compileAndRun(`
-		push 1
-		push 10
-		jmple 8
-		push 20
-		push 30
-		halt
-	`)
-	assertArrayMatch([...result], [30])
+	await step('if less than', () => {
+		const result = compileAndRun(`
+			push 1
+			push 10
+			jmple 8
+			push 20
+			push 30
+			halt
+		`)
+		assertArrayMatch([...result], [30])
+	})
 })
 
 it.run()

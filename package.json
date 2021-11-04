@@ -6,8 +6,8 @@
   "scripts": {
     "start": "deno run --allow-all script.ts",
     "start:watch": "deno run --allow-all --watch script.ts",
-    "test": "deno test --allow-all",
-    "test:watch": "deno test --allow-all --watch"
+    "test": "deno test --unstable --allow-all",
+    "test:watch": "deno test --unstable --allow-all --watch"
   },
   "repository": {
     "type": "git",
