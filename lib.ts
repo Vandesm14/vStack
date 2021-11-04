@@ -64,6 +64,11 @@ export enum Op {
 	/** jump to address if top of stack is less than or equal to value */
 	Jmple,
 
+	/** initiates a subroutine */
+	Proc,
+	/** terminates a subroutine */
+	Ret,
+
 	/** read value from the buss at address and push it to the stack */
 	Read,
 	/** write value from the stack to the bus at address */
@@ -78,26 +83,36 @@ const Ops = Object.keys(Op).filter(key => Number.isNaN(Number(key))) as (keyof t
 
 export const compile = (program: string): Op[] => {
 	const ops: Op[] = []
-	const LINE_FEED = program.indexOf('\r') > 1 ? '\r\n' : '\n'
 
-	for (let line of program.split(LINE_FEED)) {
-		if (line.trim().startsWith(';') || line.trim() === '') continue
-		line = line.trim().split(';')[0]
+	let instr = 0;
+
+	for (let line of program.split('\n')) {
+		line = line.replace(/\r/g, '').trim().split(';')[0]
+		if (line === '') continue
 		const [op, ...args] = line.split(' ').filter(el => el !== '\n')
 		const match = Ops.find(el => el.toLowerCase() === op.toLowerCase())
 
+		instr += 1
+
 		if (op && match) {
-			ops.push(Op[match], ...args.map(Number))
+			if (op.startsWith('jmp') && /[+-]/.test(args[0])) {
+				ops.push(Op[match], instr + Number(args[0]) - args.length)
+			} else {
+				ops.push(Op[match], ...args.map(Number))
+			}
 		} else {
 			throw new Error(`Unknown op: "${op}"`)
 		}
+
+		instr += args.length
 	}
 
 	return ops
 }
 
 const STACK_SIZE = 256
-const BUS_SIZE = 32
+const BUS_SIZE = 4
+const MEM_SIZE = 1024
 
 export interface runOptions {
 	/** returns the stack from the bottom to the stack pointer (instead of the entire allocated stack) */
@@ -112,6 +127,7 @@ export const run = (program: Op[], opt?: runOptions) => {
 
 	let stackPtr = 0
 	let programPtr = 0
+	let lastProgramPtr = 0
 
 	const checkLength = (size: number, p: number) => {
 		if (stackPtr - size >= 0) true
@@ -243,6 +259,13 @@ export const run = (program: Op[], opt?: runOptions) => {
 			const b = pop()
 			if (b <= a) programPtr = program[programPtr]
 			else programPtr++
+		} else if (op === Op.Proc) {
+			const a = pop()
+			push(programPtr)
+			programPtr = a
+			lastProgramPtr = programPtr + 1
+		} else if (op === Op.Ret) {
+			programPtr = pop()
 		} else if (op === Op.Read) {
 			// TODO: implement, does nothing at the moment
 			stack[stackPtr] = program[programPtr]

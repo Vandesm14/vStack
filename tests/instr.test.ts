@@ -191,7 +191,7 @@ it('not', () => {
 // TODO: Implement stkp, stki, stkd
 
 it('jmp', () => {
-	const result = compileAndRun(`
+	let result = compileAndRun(`
 		push 10
 		jmp 6
 		push 20
@@ -199,6 +199,15 @@ it('jmp', () => {
 		halt
 	`)
 	assertArrayMatch([...result], [10,30])
+
+	result = compileAndRun(`
+		push 10
+		jmp 4
+		push 20
+		push 30
+		halt
+	`)
+	assertArrayMatch([...result], [10,20,30])
 })
 
 it('jmpz', () => {
