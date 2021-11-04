@@ -1,4 +1,0 @@
-push 4
-push 2
-sub
-halt
