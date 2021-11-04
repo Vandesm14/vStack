@@ -36,4 +36,46 @@ it('jmp line/op', () => {
 	assertArrayMatch([...result], [10, 20, 30, 40])
 })
 
+//test labels
+it('label', () => {
+	let result = compileAndRun(`
+		label:
+			push 10
+			push 20
+		start:
+			push 30
+			push 40
+			halt
+	`)
+	assertArrayMatch([...result], [10, 20, 30, 40])
+
+	result = compileAndRun(`
+		jmp @start
+		label:
+			push 30
+			push 40
+			halt
+		start:
+			push 10
+			push 20
+			jmp @label
+			halt
+	`)
+	assertArrayMatch([...result], [10, 20, 30, 40])
+
+	result = compileAndRun(`
+		jmp @start
+		start:
+			push 10
+			push 20
+			jmp @label
+			halt
+		label:
+			push 30
+			push 40
+			halt
+	`)
+	assertArrayMatch([...result], [10, 20, 30, 40])
+})
+
 it.run()

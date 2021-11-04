@@ -82,9 +82,15 @@ export enum Op {
 const Ops = Object.keys(Op).filter(key => Number.isNaN(Number(key))) as (keyof typeof Op)[]
 
 export const compile = (program: string): Op[] => {
-	const ops: Op[] = []
+	const ops: (Op | string)[] = []
 
+	const labels = new Map<string, number>()
 	let instr = 0;
+
+	const tryNumber = (value: string): number | string => {
+		const num = Number(value)
+		return Number.isNaN(num) ? value : num
+	}
 
 	for (let line of program.split('\n')) {
 		line = line.replace(/\r/g, '').trim().split(';')[0]
@@ -92,13 +98,17 @@ export const compile = (program: string): Op[] => {
 		const [op, ...args] = line.split(' ').filter(el => el !== '\n')
 		const match = Ops.find(el => el.toLowerCase() === op.toLowerCase())
 
-		instr += 1
+		instr += op.endsWith(':') ? 0 : 1 // if label, don't increment
 
-		if (op && match) {
-			if (op.startsWith('jmp') && /[+-]/.test(args[0])) {
+		if (op.endsWith(':')) { // if label, add to labels
+			labels.set(op.slice(0, -1), instr)
+			continue
+		} else if (op && match) {
+			// op overrides
+			if (op.startsWith('jmp') && /[+-]/.test(args[0])) { // if relative jump
 				ops.push(Op[match], instr + Number(args[0]) - args.length)
 			} else {
-				ops.push(Op[match], ...args.map(Number))
+				ops.push(Op[match], ...args.map(tryNumber))
 			}
 		} else {
 			throw new Error(`Unknown op: "${op}"`)
@@ -107,7 +117,20 @@ export const compile = (program: string): Op[] => {
 		instr += args.length
 	}
 
-	return ops
+	for (const i in ops) {
+		const op = ops[i]
+		if (typeof op === 'string') {
+			if (op.startsWith('@')) {
+				const label = labels.get(op.slice(1))
+				if (label === undefined) throw new Error(`Unknown label: "${op}"`)
+				ops[i] = label
+			} else {
+				ops.splice(ops.indexOf(op), 1)
+			}
+		}
+	}
+
+	return ops as Op[]
 }
 
 const STACK_SIZE = 256
