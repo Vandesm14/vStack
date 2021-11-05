@@ -9,10 +9,6 @@ const assertArrayMatch = (a: number[], b: number[]) => {
 	assertObjectMatch({ value: a }, { value: b })
 }
 
-const asUint = (n: number) => {
-	return n & 0xffff
-}
-
 it('halt', async ({ step }) => {
 	await step('normal halt', () => {
 		const result = compileAndRun(`
@@ -159,7 +155,7 @@ it('not', () => {
 		not
 		halt
 	`)
-	assertArrayMatch([...result], [asUint(~10)])
+	assertArrayMatch([...result], [...new Float32Array([~10])])
 })
 
 // TODO: Implement sp
