@@ -17,11 +17,11 @@ it('halt', async ({ step }) => {
 		assertArrayMatch([...result], [])
 	})
 
-	await step('halt w/ shorten opt', () => {
+	await step('halt w/o shorten opt', () => {
 		const result = compileAndRun(`
 			halt
 		`, { shorten: false })
-		assertArrayMatch([...result], new Array(256).fill(0))
+		assertArrayMatch([...result], new Array(10).fill(0))
 	})
 })
 

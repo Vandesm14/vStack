@@ -19,4 +19,4 @@ const program: Op[] = compile(`
 	halt
 `)
 console.log('program:', program)
-console.log('result:', run(program, { shorten: true }))
+console.log('result:', run(program, { shorten: true, debug: true }))
