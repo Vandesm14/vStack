@@ -6,6 +6,8 @@
   "scripts": {
     "start": "deno run --allow-all script.ts",
     "start:watch": "deno run --allow-all --watch script.ts",
+    "lasm": "deno run --allow-all lasm/cli.ts lasm/program.txt",
+    "lasm:watch": "deno run --allow-all --watch lasm/cli.ts lasm/program.txt",
     "test": "deno test --unstable --allow-all",
     "test:watch": "deno test --unstable --allow-all --watch"
   },

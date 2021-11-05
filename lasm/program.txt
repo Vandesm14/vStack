@@ -1,0 +1,15 @@
+1       ; (accumulator)
+0       ; a, (index)
+++      ; a, (i++)
+dup	    ; a, i, (i)
+rot     ; (i), i, (a)
++       ; i, (i + a)
+dup     ; i, a, a
+rot     ; (a), a, (i)
+pop     ; a, a, [i]
+dup2    ; a, a, (i = a)
+50      ; a, i, i, (10)
+4       ; a, i, i, 10, (@2)
+jmpl    ; a, i, (i < 10 jmp @2)
+pop     ; ...a, i, [@3]
+pop     ; ...a, [i]
