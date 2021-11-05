@@ -225,6 +225,11 @@ export const run = (program: Op[], opt?: runOptions) => {
 		arg: program[ip],
 	})
 
+	const ret = () => {
+		if (opt?.shorten) return stack.slice(0, sp)
+		else return stack
+	}
+
 	while (ip < program.length) {
 		const op = program[ip++]
 
@@ -369,8 +374,7 @@ export const run = (program: Op[], opt?: runOptions) => {
 			const a = pop()
 			console.log(a)
 		} else if (op === Op.Halt) {
-			if (opt?.shorten) return stack.slice(0, sp)
-			else return stack
+			return ret()
 		} else if (op === Op.DEBUG) {
 			debug(op)
 		} else {
@@ -378,5 +382,6 @@ export const run = (program: Op[], opt?: runOptions) => {
 		}
 	}
 
-	throw new Error('Program ended without halt')
+	// throw new Error('Program ended without halt')
+	return ret()
 }
