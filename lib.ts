@@ -90,7 +90,7 @@ export enum Op {
 
 const Ops = Object.keys(Op).filter(key => Number.isNaN(Number(key))) as (keyof typeof Op)[]
 
-export const compile = (program: string): Op[] => {
+export const compile = (program: string): (Op | number)[] => {
 	const ops: (Op | string)[] = []
 
 	const labels = new Map<string, number>()
