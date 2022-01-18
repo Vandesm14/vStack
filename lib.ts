@@ -1,4 +1,4 @@
-import { yellow, blue, bold, gray, red, underline, green } from "https://deno.land/std@0.113.0/fmt/colors.ts";
+import { yellow, blue, bold, gray, red, underline, green, bgRgb24 } from "https://deno.land/std@0.113.0/fmt/colors.ts";
 export * from "https://deno.land/std@0.113.0/fmt/colors.ts"
 
 export enum Op {
@@ -261,11 +261,15 @@ export const run = (program: Op[], opt?: runOptions) => {
 			.join(' ')
 	}
 
+	const alternateBg = (str: string) => {
+		return iteration % 2 === 1 ? bgRgb24(str, 0x555555) : str
+	}
+
 	const debug = (op: number) => {
-		console.log(`${ifHex(iteration, ' ')}: ${yellow(ifHex(ip - 1, ' '))}:\t`+
+		console.log(`${alternateBg(ifHex(iteration, ' '))}: ${yellow(ifHex(ip - 1, ' '))}:\t`+
 		`(${Op[op]})\t${op === Op.Push ? program[ip - 1] : ''}\t`+
 		`${pretty(stack)}\t\t`+
-		`${gray('+/-  ') + changes.join(' ')}`)
+		`${alternateBg('+/-  ') + changes.join(' ')}`)
 	}
 
 	const ret = () => {
